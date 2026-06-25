@@ -1,4 +1,6 @@
-<?php get_header(); ?>
+<?php 
+echo 'theme loaded';
+get_header(); ?>
 
 <main id="main" class="site-main">
     <?php
