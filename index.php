@@ -1,8 +1,4 @@
-<?php 
-echo 'theme loaded on the new site';
-get_header(); 
-echo 'header done';
-?>
+<?php get_header(); ?>
 
 <main id="main" class="site-main">
     <?php
