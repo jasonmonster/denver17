@@ -2,9 +2,9 @@
 /**
  * Theme Options — Customizer
  *
- * Exposes global design tokens only: colors, contact info, social links.
- * Layout and design decisions are not configurable by design.
- * For content changes, use the WordPress editor.
+ * Exposes global design tokens only: colors, contact info, social links,
+ * and homepage section images. Layout and design decisions are not
+ * configurable by design. For content changes, use the WordPress editor.
  */
 
 function denver17_customizer( $wp_customize ) {
@@ -17,9 +17,8 @@ function denver17_customizer( $wp_customize ) {
         'priority' => 30,
     ] );
 
-    // Primary color (elk purple/maroon)
     $wp_customize->add_setting( 'denver17_color_primary', [
-        'default'           => '#5B1A1A',
+        'default'           => '#26215C',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'refresh',
     ] );
@@ -32,9 +31,8 @@ function denver17_customizer( $wp_customize ) {
         ]
     ) );
 
-    // Accent color
     $wp_customize->add_setting( 'denver17_color_accent', [
-        'default'           => '#C9A84C',
+        'default'           => '#C59B3A',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'refresh',
     ] );
@@ -42,7 +40,7 @@ function denver17_customizer( $wp_customize ) {
         $wp_customize,
         'denver17_color_accent',
         [
-            'label'   => __( 'Accent Color', 'denver17' ),
+            'label'   => __( 'Accent / Gold Color', 'denver17' ),
             'section' => 'denver17_colors',
         ]
     ) );
@@ -55,14 +53,14 @@ function denver17_customizer( $wp_customize ) {
         'priority' => 40,
     ] );
 
-    $social_fields = [
+    $contact_fields = [
         'denver17_facebook'  => 'Facebook URL',
         'denver17_instagram' => 'Instagram URL',
         'denver17_phone'     => 'Phone Number',
         'denver17_address'   => 'Address',
     ];
 
-    foreach ( $social_fields as $key => $label ) {
+    foreach ( $contact_fields as $key => $label ) {
         $wp_customize->add_setting( $key, [
             'default'           => '',
             'sanitize_callback' => 'sanitize_text_field',
@@ -73,22 +71,56 @@ function denver17_customizer( $wp_customize ) {
             'type'    => 'text',
         ] );
     }
+
+    // -------------------------------------------------------------------------
+    // Section: Homepage Images
+    // All section images live in the media library and are set here.
+    // -------------------------------------------------------------------------
+    $wp_customize->add_section( 'denver17_homepage_images', [
+        'title'    => __( 'Homepage Images', 'denver17' ),
+        'priority' => 50,
+    ] );
+
+    $homepage_images = [
+        'denver17_hero_bg'               => 'Hero — Background Image',
+        'denver17_feature_bar_img'       => 'Feature: Bar — Image',
+        'denver17_feature_community_img' => 'Feature: Community — Image',
+        'denver17_step1_img'             => 'Membership Step 1 — Image',
+        'denver17_step2_img'             => 'Membership Step 2 — Image',
+        'denver17_step3_img'             => 'Membership Step 3 — Image',
+    ];
+
+    foreach ( $homepage_images as $key => $label ) {
+        $wp_customize->add_setting( $key, [
+            'default'           => '',
+            'sanitize_callback' => 'esc_url_raw',
+        ] );
+        $wp_customize->add_control( new WP_Customize_Image_Control(
+            $wp_customize,
+            $key,
+            [
+                'label'   => __( $label, 'denver17' ),
+                'section' => 'denver17_homepage_images',
+            ]
+        ) );
+    }
 }
 add_action( 'customize_register', 'denver17_customizer' );
 
 
 /**
  * Output CSS custom properties from Customizer values.
- * This makes colors available as --color-primary etc. in CSS.
+ * The purple token palette is hardcoded in main.css.
+ * --color-accent is referenced there via var(--color-accent, #C59B3A).
  */
 function denver17_customizer_css() {
-    $primary = get_theme_mod( 'denver17_color_primary', '#5B1A1A' );
-    $accent  = get_theme_mod( 'denver17_color_accent', '#C9A84C' );
+    $primary = get_theme_mod( 'denver17_color_primary', '#26215C' );
+    $accent  = get_theme_mod( 'denver17_color_accent',  '#C59B3A' );
     ?>
-    <style>
+    <style id="denver17-customizer-css">
         :root {
             --color-primary: <?php echo esc_attr( $primary ); ?>;
-            --color-accent:  <?php echo esc_attr( $accent ); ?>;
+            --color-accent:  <?php echo esc_attr( $accent );  ?>;
         }
     </style>
     <?php

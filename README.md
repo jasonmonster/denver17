@@ -67,6 +67,18 @@ Local repo path: `/Users/jasonackerman/Dropbox (Personal)/Overtime Agency/BPOE 1
 - [ ] `template-parts/home/events-band.php`
 - [ ] `template-parts/home/cta-band.php`
 
+### Session 1.1 — Site Setup Script
+
+A one-time WP-CLI script (`bin/setup.php`) run via `wp eval-file bin/setup.php` on staging after the theme is active. Build this once the sitemap is locked.
+
+- [ ] Create all sitemap pages as blank drafts with correct parent/child hierarchy
+- [ ] Create nav menus and assign pages in the correct order
+- [ ] Assign menus to registered locations (primary, mobile, footer)
+- [ ] Set Customizer defaults (colors, phone, address, social URLs)
+- [ ] Set static front page and posts page in Reading Settings
+
+Script should be idempotent — check for existing pages before creating, so re-running it is safe.
+
 ### Session 2 — CSS
 
 - [ ] Port all mockup styles into `assets/css/main.css`
