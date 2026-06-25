@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "denver17/membership-steps",
+  "title": "Membership Steps",
+  "category": "denver17",
+  "description": "Three-step membership funnel. Each step has a photo, title, and body copy.",
+  "supports": { "html": false, "className": false, "anchor": false },
+  "attributes": {
+    "sectionTag":     { "type": "string", "default": "Membership" },
+    "sectionHeading": { "type": "string", "default": "From guest to lodge family" },
+    "step1Title": { "type": "string", "default": "Stop in as a guest" },
+    "step1Body":  { "type": "string", "default": "Visit the bar, meet some members, see what Jolly Corks is about. No pressure. Just cold drinks and real people." },
+    "step1Image": { "type": "object", "default": {} },
+    "step2Title": { "type": "string", "default": "Apply for membership" },
+    "step2Body":  { "type": "string", "default": "Open to all. A short application, a sponsor from inside the lodge, and you\u2019re on your way. Most people wonder why they waited." },
+    "step2Image": { "type": "object", "default": {} },
+    "step3Title": { "type": "string", "default": "Get your member number" },
+    "step3Body":  { "type": "string", "default": "Member pricing on drinks, golf simulator access, invites to events, and a lodge that\u2019s had your back since 1882." },
+    "step3Image": { "type": "object", "default": {} }
+  }
+}

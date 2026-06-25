@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "denver17/cta-band",
+  "title": "CTA Band",
+  "category": "denver17",
+  "description": "Closing call-to-action section.",
+  "supports": { "html": false, "className": false, "anchor": false },
+  "attributes": {
+    "eyebrow":    { "type": "string", "default": "Mother Lodge of the Rockies" },
+    "heading":    { "type": "string", "default": "Come see what #17 is about." },
+    "buttonText": { "type": "string", "default": "Plan your visit" },
+    "buttonUrl":  { "type": "string", "default": "" }
+  }
+}

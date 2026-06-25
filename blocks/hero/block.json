@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "denver17/hero",
+  "title": "Hero",
+  "category": "denver17",
+  "description": "Homepage hero with background image, headline, subtext, and CTA button.",
+  "supports": { "html": false, "className": false, "anchor": false },
+  "attributes": {
+    "eyebrow":          { "type": "string", "default": "Denver, Colorado \u00b7 Est. 1882" },
+    "headingLine1":     { "type": "string", "default": "A private bar," },
+    "headingLine2":     { "type": "string", "default": "144 years of giving back." },
+    "subtext":          { "type": "string", "default": "Lodge #17 \u2014 Mother Lodge of the Rockies. A full bar, beer garden, golf simulators, and a downtown Denver view that does all the talking." },
+    "ctaText":          { "type": "string", "default": "See upcoming events" },
+    "ctaUrl":           { "type": "string", "default": "" },
+    "backgroundImage":  { "type": "object", "default": {} }
+  }
+}

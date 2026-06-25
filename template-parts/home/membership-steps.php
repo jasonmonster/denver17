@@ -2,51 +2,35 @@
 /**
  * Template Part: Membership Steps
  *
- * Three-step membership funnel section.
- * Step images are set via Customizer → Homepage Images.
+ * Called by the denver17/membership-steps block render callback with $args.
+ *
+ * $args:
+ *   section_tag     (string)
+ *   section_heading (string)
+ *   steps           (array) — each item: num, title, body, image_url, image_alt
  */
 
-$steps = [
-    [
-        'num'       => 'Step 1',
-        'title'     => 'Stop in as a guest',
-        'body'      => 'Visit the bar, meet some members, see what Jolly Corks is about. No pressure. Just cold drinks and real people.',
-        'image_url' => get_theme_mod( 'denver17_step1_img', '' ),
-        'image_alt' => 'Members at the bar',
-    ],
-    [
-        'num'       => 'Step 2',
-        'title'     => 'Apply for membership',
-        'body'      => 'Open to all. A short application, a sponsor from inside the lodge, and you&rsquo;re on your way. Most people wonder why they waited.',
-        'image_url' => get_theme_mod( 'denver17_step2_img', '' ),
-        'image_alt' => 'Member celebrating at the lodge',
-    ],
-    [
-        'num'       => 'Step 3',
-        'title'     => 'Get your member number',
-        'body'      => 'Member pricing on drinks, golf simulator access, invites to events, and a lodge that&rsquo;s had your back since 1882.',
-        'image_url' => get_theme_mod( 'denver17_step3_img', '' ),
-        'image_alt' => 'Members having fun at the lodge',
-    ],
-];
+$section_tag     = $args['section_tag']     ?? 'Membership';
+$section_heading = $args['section_heading'] ?? 'From guest to lodge family';
+$steps           = $args['steps']           ?? [];
 ?>
 
 <section class="steps-wrap">
 
-    <div class="steps-tag">Membership</div>
-    <h2 class="steps-h">From guest to lodge family</h2>
+    <div class="steps-tag"><?php echo esc_html( $section_tag ); ?></div>
+    <h2 class="steps-h"><?php echo esc_html( $section_heading ); ?></h2>
 
     <div class="steps-grid">
         <?php foreach ( $steps as $step ) : ?>
             <div class="step">
-                <?php if ( $step['image_url'] ) : ?>
+                <?php if ( ! empty( $step['image_url'] ) ) : ?>
                     <img class="step-photo"
                          src="<?php echo esc_url( $step['image_url'] ); ?>"
-                         alt="<?php echo esc_attr( $step['image_alt'] ); ?>">
+                         alt="<?php echo esc_attr( $step['image_alt'] ?? '' ); ?>">
                 <?php endif; ?>
                 <div class="step-num"><?php echo esc_html( $step['num'] ); ?></div>
                 <h3 class="step-title"><?php echo esc_html( $step['title'] ); ?></h3>
-                <p class="step-body"><?php echo wp_kses_post( $step['body'] ); ?></p>
+                <p class="step-body"><?php echo nl2br( esc_html( $step['body'] ) ); ?></p>
             </div>
         <?php endforeach; ?>
     </div>

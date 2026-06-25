@@ -11,3 +11,4 @@ require_once get_template_directory() . '/inc/nav-walkers.php';
 require_once get_template_directory() . '/inc/enqueue.php';
 require_once get_template_directory() . '/inc/theme-options.php';
 require_once get_template_directory() . '/inc/template-functions.php';
+require_once get_template_directory() . '/inc/blocks.php';

@@ -2,19 +2,14 @@
 /**
  * Template Part: Events Band
  *
- * Homepage events section. Currently static placeholder markup.
+ * Static placeholder until the events plugin is live (Session 6).
+ * When the plugin is ready, swap the $events array for a real query.
  *
- * TODO (Session 6 / plugin): Replace with a real events query once the
- * custom events plugin (CPT: d17_event) is in place. The plugin will expose
- * a function (e.g. denver17_upcoming_events(4)) returning the next N events
- * with featured images, dates, and titles. Swap the static $events array below
- * for that output.
- *
- * Grid layout expects:
- *   Column 1 — 1 large card
- *   Column 2 — 2 stacked small cards
- *   Column 3 — 1 large card
+ * $args:
+ *   section_heading (string)
  */
+
+$section_heading = $args['section_heading'] ?? 'Upcoming at the lodge';
 
 $events = [
     [
@@ -52,7 +47,7 @@ $events = [
 
     <div class="eb-head">
         <div class="eb-tag">What&rsquo;s happening</div>
-        <h2 class="eb-h">Upcoming at the lodge</h2>
+        <h2 class="eb-h"><?php echo esc_html( $section_heading ); ?></h2>
     </div>
 
     <div class="eb-grid">

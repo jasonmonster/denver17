@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "denver17/events-band",
+  "title": "Events Band",
+  "category": "denver17",
+  "description": "Upcoming events grid. Static placeholder until the events plugin is live (Session 6).",
+  "supports": { "html": false, "className": false, "anchor": false },
+  "attributes": {
+    "sectionHeading": { "type": "string", "default": "Upcoming at the lodge" }
+  }
+}

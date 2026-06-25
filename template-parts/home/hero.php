@@ -2,37 +2,43 @@
 /**
  * Template Part: Homepage Hero
  *
- * Full-bleed hero with background image, headline, and hours card.
- * Background image is set via Customizer → Homepage Images → Hero Background Image.
+ * Called by the denver17/hero block render callback with $args from block attributes.
+ * All values fall back to sensible defaults if args aren't provided.
  *
- * Note: hero-bg is an <img> for now. Swap for <video autoplay muted loop playsinline>
- * with class="hero-bg" once footage is ready — the overlay treatment works for both.
+ * Note: hero-bg is an <img> tag. Swap for <video autoplay muted loop playsinline
+ * class="hero-bg"> once footage is ready — the overlay treatment works for both.
  */
 
-$hero_bg = get_theme_mod( 'denver17_hero_bg', '' );
+$bg_image      = $args['bg_image']      ?? '';
+$bg_image_alt  = $args['bg_image_alt']  ?? '';
+$eyebrow       = $args['eyebrow']       ?? 'Denver, Colorado &middot; Est. 1882';
+$heading_line1 = $args['heading_line1'] ?? 'A private bar,';
+$heading_line2 = $args['heading_line2'] ?? '144 years of giving back.';
+$subtext       = $args['subtext']       ?? 'Lodge #17 &mdash; Mother Lodge of the Rockies. A full bar, beer garden, golf simulators, and a downtown Denver view that does all the talking.';
+$cta_text      = $args['cta_text']      ?? 'See upcoming events';
+$cta_url       = $args['cta_url']       ?? home_url( '/events/' );
 ?>
 
 <section class="hero">
 
-    <?php if ( $hero_bg ) : ?>
+    <?php if ( $bg_image ) : ?>
         <img class="hero-bg"
-             src="<?php echo esc_url( $hero_bg ); ?>"
-             alt=""
+             src="<?php echo esc_url( $bg_image ); ?>"
+             alt="<?php echo esc_attr( $bg_image_alt ); ?>"
              aria-hidden="true">
     <?php endif; ?>
 
     <div class="hero-overlay" aria-hidden="true"></div>
 
     <div class="hero-content">
-        <div class="hero-eyebrow">Denver, Colorado &middot; Est. 1882</div>
+        <div class="hero-eyebrow"><?php echo esc_html( $eyebrow ); ?></div>
         <h1 class="hero-h">
-            A private bar, <em>144 years</em> of giving back.
+            <?php echo esc_html( $heading_line1 ); ?>
+            <em><?php echo esc_html( $heading_line2 ); ?></em>
         </h1>
-        <p class="hero-sub">
-            Lodge #17 &mdash; Mother Lodge of the Rockies. A full bar, beer garden, golf simulators, and a downtown Denver view that does all the talking.
-        </p>
-        <a class="hero-btn" href="<?php echo esc_url( home_url( '/events/' ) ); ?>">
-            See upcoming events
+        <p class="hero-sub"><?php echo esc_html( $subtext ); ?></p>
+        <a class="hero-btn" href="<?php echo esc_url( $cta_url ); ?>">
+            <?php echo esc_html( $cta_text ); ?>
         </a>
     </div>
 

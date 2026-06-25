@@ -1,0 +1,14 @@
+/**
+ * Block Editor Styles
+ *
+ * Loaded in the Gutenberg editor via add_editor_style() in theme-setup.php.
+ * Scoped to the editor canvas — does not affect the front end.
+ */
+
+/* Give the editor body a background closer to the site's actual bg */
+body {
+  background: #f7f5ff;
+}
+
+/* Tighten up the default block spacing on the homepage canvas */
+.wp-block { margin-top: 0 !important; margin-bottom: 0 !important; }
