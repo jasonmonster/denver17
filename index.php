@@ -1,5 +1,5 @@
 <?php 
-echo 'theme loaded';
+echo 'theme loaded on the new site';
 get_header(); 
 echo 'header done';
 ?>
