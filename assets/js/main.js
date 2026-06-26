@@ -20,6 +20,9 @@
   //   special    string          notice text, or empty
   //   display_1  string          base hours line 1
   //   display_2  string          base hours line 2, or empty to hide
+  //
+  // Dev preview: add ?hours=open, ?hours=opens_at, or ?hours=closed
+  // to the URL to force a specific state without waiting for the clock.
   // ---------------------------------------------------------------------------
 
   var DAY_NAMES   = [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ];
@@ -66,13 +69,12 @@
 
     if ( ! row ) return;
 
-    // ── Date display ────────────────────────────────────────────────────────
+    // Date display
     var now = new Date();
     dateEl.textContent = DAY_NAMES[ now.getDay() ] + ', '
       + MONTH_NAMES[ now.getMonth() ] + '\u00a0' + now.getDate();
 
-    // ── Hours data ──────────────────────────────────────────────────────────
-    // Use the Sheets-sourced data if available; fall back to Tue-Sat 5:30 PM.
+    // Hours data from Sheets via wp_localize_script, with hardcoded fallback
     var h = ( typeof window.denver17Hours !== 'undefined' && window.denver17Hours )
       ? window.denver17Hours
       : {
@@ -83,7 +85,18 @@
           display_2:  '',
         };
 
-    // ── Compute live status ─────────────────────────────────────────────────
+    // Dev preview: ?hours=open | opens_at | closed
+    // Forces a specific state without waiting for real time to match.
+    var previewState = new URLSearchParams( window.location.search ).get( 'hours' );
+    if ( previewState === 'open' ) {
+      h = Object.assign( {}, h, { open_time: '00:00' } );
+    } else if ( previewState === 'opens_at' ) {
+      h = Object.assign( {}, h, { open_time: '23:59' } );
+    } else if ( previewState === 'closed' ) {
+      h = Object.assign( {}, h, { open_time: '' } );
+    }
+
+    // Compute live open/closed status
     var openDecimal  = parseTime24( h.open_time );
     var nowDecimal   = now.getHours() + now.getMinutes() / 60;
     var isOpenToday  = openDecimal !== null;
@@ -93,13 +106,11 @@
     var closeFormatted = h.close_time ? formatTime12( h.close_time ) : 'Close';
 
     if ( ! isOpenToday ) {
-      // ── CLOSED TODAY ────────────────────────────────────────────────────
       row.classList.add( 'is-closed' );
       statusEl.textContent = 'Closed today';
-      rangeEl.textContent  = '\u2014'; // em dash placeholder
+      rangeEl.textContent  = '\u2014';
 
     } else if ( isOpenNow ) {
-      // ── WE ARE OPEN ─────────────────────────────────────────────────────
       row.classList.add( 'is-open' );
       statusEl.textContent = 'We\u2019re open';
       rangeEl.textContent  = h.close_time
@@ -107,19 +118,18 @@
         : 'Open until close';
 
     } else {
-      // ── OPENS LATER TODAY ───────────────────────────────────────────────
       row.classList.add( 'is-opens-at' );
       statusEl.textContent = 'Opens at ' + openFormatted;
       rangeEl.textContent  = openFormatted + '\u2013' + closeFormatted;
     }
 
-    // ── Special notice ──────────────────────────────────────────────────────
+    // Special notice (hidden when empty)
     if ( specialEl && h.special ) {
       specialEl.textContent = h.special;
       specialEl.hidden = false;
     }
 
-    // ── Base hours display lines ────────────────────────────────────────────
+    // Base hours display lines
     if ( baseEl ) {
       baseEl.textContent = h.display_1 || '';
     }
@@ -159,7 +169,6 @@
     closeBtn.addEventListener( 'click', closeMenu );
     backdrop.addEventListener( 'click', closeMenu );
 
-    // Close on Escape
     document.addEventListener( 'keydown', function ( e ) {
       if ( e.key === 'Escape' && menu.classList.contains( 'is-open' ) ) {
         closeMenu();
