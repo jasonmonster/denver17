@@ -751,7 +751,7 @@ nav.site-nav {
 .footer-copy {
   font-size: 11px;
   letter-spacing: 1px;
-  color: var(--p600);
+  color: var(--p200);
   text-transform: uppercase;
 }
 
@@ -767,8 +767,8 @@ nav.site-nav {
   gap: 16px;
 }
 
-.social-links--footer a { color: var(--p600); }
-.social-links--footer a:hover { color: var(--p100); }
+.social-links--footer a { color: var(--p200); }
+.social-links--footer a:hover { color: var(--p50); }
 
 .footer-nav {
   list-style: none;
@@ -780,12 +780,12 @@ nav.site-nav {
   font-size: 11px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--p600);
+  color: var(--p200);
   text-decoration: none;
   transition: color .15s ease;
 }
 
-.footer-nav a:hover { color: var(--p100); }
+.footer-nav a:hover { color: var(--p50); }
 
 
 /* --------------------------------------------------------------------------
