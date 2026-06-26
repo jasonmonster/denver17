@@ -173,8 +173,11 @@ function denver17_get_hours_data() {
             $date_raw = trim( $row[0] ?? '' );
             if ( '' === $date_raw ) continue;
 
-            // Strip day-of-week prefix if present ("Friday, June 26" -> "June 26")
-            $date_clean = trim( preg_replace( '/^[A-Za-z]+,\s*/', '', $date_raw ) );
+            // Strip day-of-week prefix if present ("Friday, June 26" -> "June 26").
+            // Use /u flag so \s matches Unicode whitespace incl. non-breaking spaces
+            // that Google Sheets embeds in CSV exports.
+            $date_clean = preg_replace( '/^[A-Za-z]+,\s*/u', '', $date_raw );
+            $date_clean = preg_replace( '/\s+$/u', '', $date_clean );
             // Append current year if missing so strtotime is unambiguous
             if ( ! preg_match( '/\d{4}/', $date_clean ) ) {
                 $date_clean .= ', ' . date( 'Y' );
