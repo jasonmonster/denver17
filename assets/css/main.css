@@ -34,9 +34,13 @@
   box-sizing: border-box;
 }
 
+html {
+  background: var(--p950);
+}
+
 body {
   font-family: 'Helvetica Neue', Arial, sans-serif;
-  background: #f7f5ff;
+  background: var(--p950);
   color: var(--p900);
 }
 
@@ -538,6 +542,7 @@ nav.site-nav {
    -------------------------------------------------------------------------- */
 .steps-wrap {
   padding: 100px 48px 70px;
+  background: #f7f5ff;
 }
 
 .steps-tag {
@@ -1041,6 +1046,10 @@ nav.site-nav {
     gap: 16px;
   }
 
+  /* Site header — tighter top padding on mobile inner pages */
+  .site-header { padding-top: 14px; padding-bottom: 14px; }
+  .home .site-header { padding-top: 0; padding-bottom: 0; }
+
   /* Inner page banner */
   .page-banner { padding: 40px 22px 44px; }
   .page-banner-title { font-size: 30px; }
@@ -1074,11 +1083,13 @@ nav.site-nav {
    The homepage overrides this below with transparent + position absolute. */
 .site-header {
   background: var(--p950);
+  padding-top: 20px;
   padding-bottom: 20px;
 }
 
 .home .site-header {
   background: transparent;
+  padding-top: 0;
   padding-bottom: 0;
 }
 
