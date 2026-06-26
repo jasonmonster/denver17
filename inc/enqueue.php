@@ -27,3 +27,21 @@ function denver17_enqueue_assets() {
     );
 }
 add_action( 'wp_enqueue_scripts', 'denver17_enqueue_assets' );
+
+
+/**
+ * Remove WP block library stylesheets from the front end.
+ *
+ * WP 6.x auto-loads wp-block-library, wp-block-library-theme, and
+ * global-styles on every page. These inject default link colors,
+ * button styles, and layout utilities that override custom theme CSS.
+ * Since all block styles for this theme live in main.css, none of
+ * these sheets are needed on the front end.
+ *
+ * Priority 100 runs after WP registers them at the default priority.
+ */
+add_action( 'wp_enqueue_scripts', function () {
+    wp_dequeue_style( 'wp-block-library' );
+    wp_dequeue_style( 'wp-block-library-theme' );
+    wp_dequeue_style( 'global-styles' );
+}, 100 );
