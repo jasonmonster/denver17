@@ -10,12 +10,12 @@
  *
  * ── Tab: "Beers" (name configurable via DENVER17_BEER_SHEET_NAME) ────────────
  * Columns (row 1 = header, ignored):
- *   A  Name     Coors Banquet
- *   B  Style    American Lager
- *   C  ABV      5.0
- *   D  Status   On Tap | Coming Soon | Not In Stock
- *
- * Only "On Tap" and "Coming Soon" rows are returned. "Not In Stock" is ignored.
+ *   A  ID       (numeric, ignored)
+ *   B  Name     Dry Dock - Apricot Blonde
+ *   C  Style    Fruited Ale
+ *   D  ABV      5.0
+ *   E  Status   On Tap | Coming Soon | Not In Stock
+ *   F  Order    (integer; controls display sort order within each section)
  */
 
 // ── Configuration ─────────────────────────────────────────────────────────────
@@ -86,14 +86,15 @@ function denver17_get_beer_data() {
     $coming_soon = [];
 
     foreach ( $rows as $row ) {
-        $name   = trim( $row[0] ?? '' );
-        $style  = trim( $row[1] ?? '' );
-        $abv    = trim( $row[2] ?? '' );
-        $status = trim( $row[3] ?? '' );
+        $name   = trim( $row[1] ?? '' ); // B: Name
+        $style  = trim( $row[2] ?? '' ); // C: Style
+        $abv    = trim( $row[3] ?? '' ); // D: ABV
+        $status = trim( $row[4] ?? '' ); // E: Status
+        $order  = trim( $row[5] ?? '' ); // F: Order (display sort)
 
         if ( '' === $name ) continue;
 
-        $beer = compact( 'name', 'style', 'abv' );
+        $beer = [ 'name' => $name, 'style' => $style, 'abv' => $abv, 'order' => (int) $order ];
 
         if ( 'On Tap' === $status ) {
             $on_tap[] = $beer;
@@ -102,6 +103,15 @@ function denver17_get_beer_data() {
         }
         // 'Not In Stock' and anything else: silently ignored
     }
+
+    // Sort by Order column (0 = no order set, sorts last)
+    $sort = function ( $a, $b ) {
+        $ao = $a['order'] ?: PHP_INT_MAX;
+        $bo = $b['order'] ?: PHP_INT_MAX;
+        return $ao <=> $bo;
+    };
+    usort( $on_tap, $sort );
+    usort( $coming_soon, $sort );
 
     $data = compact( 'on_tap', 'coming_soon' );
     set_transient( 'denver17_beer_data', $data, DENVER17_BEER_CACHE_TTL );
