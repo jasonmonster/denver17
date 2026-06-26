@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "denver17/beer-list",
+  "title": "Beer List",
+  "category": "denver17",
+  "description": "Live tap list pulled from Google Sheets. Drop on the Jolly Corks Bar or Club Room page.",
+  "supports": { "html": false, "className": false, "anchor": true },
+  "attributes": {
+    "heading":       { "type": "string",  "default": "On Tap" },
+    "showStyle":     { "type": "boolean", "default": true },
+    "showAbv":       { "type": "boolean", "default": true },
+    "showComingSoon":{ "type": "boolean", "default": true }
+  }
+}

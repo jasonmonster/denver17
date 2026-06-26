@@ -436,4 +436,59 @@
     save: function () { return null; }
   } );
 
+  // ---------------------------------------------------------------------------
+  // denver17/beer-list
+  // ---------------------------------------------------------------------------
+
+  registerBlock( 'denver17/beer-list', {
+    title: 'Beer List',
+    category: 'denver17',
+    description: 'Live tap list from Google Sheets.',
+    attributes: {
+      heading:        { type: 'string',  default: 'On Tap' },
+      showStyle:      { type: 'boolean', default: true },
+      showAbv:        { type: 'boolean', default: true },
+      showComingSoon: { type: 'boolean', default: true },
+    },
+    edit: function ( props ) {
+      var attrs      = props.attributes;
+      var set        = props.setAttributes;
+      var blockProps = useBlockProps();
+
+      return el( Fragment, null,
+        el( InspectorControls, null,
+          el( PanelBody, { title: 'Content', initialOpen: true },
+            el( TextControl, {
+              label: 'Heading',
+              help:  'Displayed above the tap list. Leave blank to hide.',
+              value: attrs.heading,
+              onChange: function ( v ) { set( { heading: v } ); }
+            } )
+          ),
+          el( PanelBody, { title: 'Display', initialOpen: true },
+            el( ToggleControl, {
+              label:    'Show beer style',
+              checked:  attrs.showStyle,
+              onChange: function ( v ) { set( { showStyle: v } ); }
+            } ),
+            el( ToggleControl, {
+              label:    'Show ABV',
+              checked:  attrs.showAbv,
+              onChange: function ( v ) { set( { showAbv: v } ); }
+            } ),
+            el( ToggleControl, {
+              label:    'Show coming soon section',
+              checked:  attrs.showComingSoon,
+              onChange: function ( v ) { set( { showComingSoon: v } ); }
+            } )
+          )
+        ),
+        el( 'div', blockProps,
+          canvasPlaceholder( 'Beer List', 'Live from Google Sheets · renders on front end' )
+        )
+      );
+    },
+    save: function () { return null; }
+  } );
+
 } )();
