@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "denver17/hours-display",
+  "title": "Hours Display",
+  "category": "denver17",
+  "description": "Live hours status pulled from the Google Sheets schedule. Intended for the When & Where page.",
+  "supports": { "html": false, "className": false, "anchor": true },
+  "attributes": {
+    "heading":       { "type": "string",  "default": "" },
+    "showStatus":    { "type": "boolean", "default": true },
+    "showSpecial":   { "type": "boolean", "default": true },
+    "showBaseHours": { "type": "boolean", "default": true },
+    "showNote":      { "type": "boolean", "default": true }
+  }
+}

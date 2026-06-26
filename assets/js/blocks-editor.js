@@ -371,4 +371,69 @@
     save: function () { return null; }
   } );
 
+  // ---------------------------------------------------------------------------
+  // denver17/hours-display
+  // ---------------------------------------------------------------------------
+
+  var ToggleControl = wp.components.ToggleControl;
+
+  registerBlock( 'denver17/hours-display', {
+    title: 'Hours Display',
+    category: 'denver17',
+    description: 'Live hours pulled from Google Sheets. All sections can be toggled.',
+    attributes: {
+      heading:       { type: 'string',  default: '' },
+      showStatus:    { type: 'boolean', default: true },
+      showSpecial:   { type: 'boolean', default: true },
+      showBaseHours: { type: 'boolean', default: true },
+      showNote:      { type: 'boolean', default: true },
+    },
+    edit: function ( props ) {
+      var attrs      = props.attributes;
+      var set        = props.setAttributes;
+      var blockProps = useBlockProps();
+
+      return el( Fragment, null,
+        el( InspectorControls, null,
+          el( PanelBody, { title: 'Content', initialOpen: true },
+            el( TextControl, {
+              label: 'Optional heading',
+              help:  'Leave blank to show no heading above the hours block.',
+              value: attrs.heading,
+              onChange: function ( v ) { set( { heading: v } ); }
+            } )
+          ),
+          el( PanelBody, { title: 'Sections', initialOpen: true },
+            el( ToggleControl, {
+              label:    'Show open/closed status',
+              checked:  attrs.showStatus,
+              onChange: function ( v ) { set( { showStatus: v } ); }
+            } ),
+            el( ToggleControl, {
+              label:    'Show special notice',
+              help:     'The notice from column D of the Schedule tab.',
+              checked:  attrs.showSpecial,
+              onChange: function ( v ) { set( { showSpecial: v } ); }
+            } ),
+            el( ToggleControl, {
+              label:    'Show base hours',
+              help:     'The regular weekly schedule lines from the Base Hours tab.',
+              checked:  attrs.showBaseHours,
+              onChange: function ( v ) { set( { showBaseHours: v } ); }
+            } ),
+            el( ToggleControl, {
+              label:    'Show "hours subject to change" note',
+              checked:  attrs.showNote,
+              onChange: function ( v ) { set( { showNote: v } ); }
+            } )
+          )
+        ),
+        el( 'div', blockProps,
+          canvasPlaceholder( 'Hours Display', 'Live from Google Sheets · renders on front end' )
+        )
+      );
+    },
+    save: function () { return null; }
+  } );
+
 } )();
