@@ -21,12 +21,13 @@ $cta_url       = $args['cta_url']       ?? home_url( '/events/' );
 
 <section class="hero">
 
-    <?php if ( $bg_image ) : ?>
-        <img class="hero-bg"
-             src="<?php echo esc_url( $bg_image ); ?>"
-             alt="<?php echo esc_attr( $bg_image_alt ); ?>"
-             aria-hidden="true">
-    <?php endif; ?>
+    <?php
+    $hero_bg_src = $bg_image ?: denver17_placeholder( 1600, 800, 'Hero Background — View from Bar' );
+    ?>
+    <img class="hero-bg"
+         src="<?php echo esc_url( $hero_bg_src ); ?>"
+         alt="<?php echo esc_attr( $bg_image_alt ); ?>"
+         aria-hidden="true">
 
     <div class="hero-overlay" aria-hidden="true"></div>
 

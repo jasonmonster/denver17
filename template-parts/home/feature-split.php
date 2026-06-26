@@ -37,10 +37,11 @@ $body_html     = nl2br( esc_html( $body ) );
     <?php if ( $layout === 'image-left' ) : ?>
 
         <div class="feature-img">
-            <?php if ( $image_url ) : ?>
-                <img src="<?php echo esc_url( $image_url ); ?>"
-                     alt="<?php echo esc_attr( $image_alt ); ?>">
-            <?php endif; ?>
+            <?php
+            $img_src = $image_url ?: denver17_placeholder( 800, 600, ( $tag ?: 'Section' ) . ' Photo' );
+            ?>
+            <img src="<?php echo esc_url( $img_src ); ?>"
+                 alt="<?php echo esc_attr( $image_alt ); ?>">
         </div>
 
         <div class="<?php echo esc_attr( $text_class ); ?>">
@@ -68,10 +69,11 @@ $body_html     = nl2br( esc_html( $body ) );
         </div>
 
         <div class="feature-img">
-            <?php if ( $image_url ) : ?>
-                <img src="<?php echo esc_url( $image_url ); ?>"
-                     alt="<?php echo esc_attr( $image_alt ); ?>">
-            <?php endif; ?>
+            <?php
+            $img_src = $image_url ?: denver17_placeholder( 800, 600, ( $tag ?: 'Section' ) . ' Photo' );
+            ?>
+            <img src="<?php echo esc_url( $img_src ); ?>"
+                 alt="<?php echo esc_attr( $image_alt ); ?>">
         </div>
 
     <?php endif; ?>

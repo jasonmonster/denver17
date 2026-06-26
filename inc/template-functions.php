@@ -7,6 +7,21 @@
  */
 
 /**
+ * Returns a placehold.co URL for staging use when no real image has been uploaded.
+ * Uses the brand purple palette so placeholders are clearly on-theme and
+ * distinguishable from real photos during client review.
+ *
+ * @param int    $width   Image width in pixels.
+ * @param int    $height  Image height in pixels.
+ * @param string $text    Human-readable label describing the expected photo.
+ * @return string
+ */
+function denver17_placeholder( $width, $height, $text = '' ) {
+    $base = 'https://placehold.co/' . (int) $width . 'x' . (int) $height . '/3c3489/CECBF6';
+    return $text ? $base . '?text=' . rawurlencode( $text ) : $base;
+}
+
+/**
  * Returns the phone number from Customizer.
  */
 function denver17_get_phone() {

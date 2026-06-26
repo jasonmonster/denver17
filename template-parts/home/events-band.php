@@ -16,28 +16,28 @@ $events = [
         'date'      => 'Jun 19 &middot; Annual',
         'name'      => 'Elkstock Music Festival',
         'image_url' => '',
-        'image_alt' => 'Elkstock festival',
+        'image_alt' => 'Elkstock Music Festival',
         'size'      => 'large',
     ],
     [
         'date'      => 'Fridays',
         'name'      => 'Beer garden nights',
         'image_url' => '',
-        'image_alt' => 'Beer garden at night',
+        'image_alt' => 'Beer Garden at Night',
         'size'      => 'small',
     ],
     [
         'date'      => 'Daily',
         'name'      => 'Happy hour',
         'image_url' => '',
-        'image_alt' => 'Cocktails at the bar',
+        'image_alt' => 'Happy Hour Cocktails',
         'size'      => 'small',
     ],
     [
         'date'      => 'Jul 4 &middot; Holiday',
-        'name'      => 'Fourth of July rooftop party',
+        'name'      => 'Fourth of July Rooftop Party',
         'image_url' => '',
-        'image_alt' => 'Denver skyline at dusk',
+        'image_alt' => 'Denver Skyline at Dusk',
         'size'      => 'large',
     ],
 ];
@@ -52,12 +52,13 @@ $events = [
 
     <div class="eb-grid">
 
-        <?php $card = $events[0]; ?>
+        <?php
+        $card    = $events[0];
+        $img_src = $card['image_url'] ?: denver17_placeholder( 800, 600, $card['image_alt'] );
+        ?>
         <div class="eb-card">
-            <?php if ( $card['image_url'] ) : ?>
-                <img src="<?php echo esc_url( $card['image_url'] ); ?>"
-                     alt="<?php echo esc_attr( $card['image_alt'] ); ?>">
-            <?php endif; ?>
+            <img src="<?php echo esc_url( $img_src ); ?>"
+                 alt="<?php echo esc_attr( $card['image_alt'] ); ?>">
             <div class="eb-card-overlay">
                 <div class="eb-date"><?php echo wp_kses_post( $card['date'] ); ?></div>
                 <div class="eb-name"><?php echo esc_html( $card['name'] ); ?></div>
@@ -65,12 +66,12 @@ $events = [
         </div>
 
         <div class="eb-col">
-            <?php foreach ( [ $events[1], $events[2] ] as $card ) : ?>
+            <?php foreach ( [ $events[1], $events[2] ] as $card ) :
+                $img_src = $card['image_url'] ?: denver17_placeholder( 800, 400, $card['image_alt'] );
+            ?>
                 <div class="eb-card small">
-                    <?php if ( $card['image_url'] ) : ?>
-                        <img src="<?php echo esc_url( $card['image_url'] ); ?>"
-                             alt="<?php echo esc_attr( $card['image_alt'] ); ?>">
-                    <?php endif; ?>
+                    <img src="<?php echo esc_url( $img_src ); ?>"
+                         alt="<?php echo esc_attr( $card['image_alt'] ); ?>">
                     <div class="eb-card-overlay">
                         <div class="eb-date"><?php echo wp_kses_post( $card['date'] ); ?></div>
                         <div class="eb-name"><?php echo esc_html( $card['name'] ); ?></div>
@@ -79,12 +80,13 @@ $events = [
             <?php endforeach; ?>
         </div>
 
-        <?php $card = $events[3]; ?>
+        <?php
+        $card    = $events[3];
+        $img_src = $card['image_url'] ?: denver17_placeholder( 800, 600, $card['image_alt'] );
+        ?>
         <div class="eb-card">
-            <?php if ( $card['image_url'] ) : ?>
-                <img src="<?php echo esc_url( $card['image_url'] ); ?>"
-                     alt="<?php echo esc_attr( $card['image_alt'] ); ?>">
-            <?php endif; ?>
+            <img src="<?php echo esc_url( $img_src ); ?>"
+                 alt="<?php echo esc_attr( $card['image_alt'] ); ?>">
             <div class="eb-card-overlay">
                 <div class="eb-date"><?php echo wp_kses_post( $card['date'] ); ?></div>
                 <div class="eb-name"><?php echo esc_html( $card['name'] ); ?></div>

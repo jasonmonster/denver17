@@ -124,11 +124,15 @@ Feature Split heading field: hit Enter between lines — each line becomes a lin
 - [x] `front-page.php` switched to `the_content()`
 - [x] All template parts updated to accept `$args` with sensible defaults
 
-### Session 4 — Inner Pages
+### ✅ Session 4 — Inner Pages
 
-- [ ] `single.php`
-- [ ] `archive.php`
-- [ ] Interior page templates: Visit, Learn, Community, Contact
+- [x] `template-parts/page/banner.php` — shared page title banner (eyebrow, h1, subtitle, meta)
+- [x] `page.php` — updated to include banner partial and `page-entry-content` wrapper
+- [x] `single.php` — single post with category eyebrow, date/author meta, featured image
+- [x] `archive.php` — 2-col post card grid with pagination
+- [x] `inc/template-functions.php` — `denver17_placeholder()` helper added
+- [x] All home template parts updated with placeholder fallbacks (hero, feature-split, membership-steps, events-band)
+- [x] `assets/css/main.css` — Sections 13–17: inner page header, page banner, entry content layout (alignwide/alignfull), entry content typography, single post, archive + pagination
 
 ### Session 5 — Content & Configuration
 
@@ -138,11 +142,27 @@ Feature Split heading field: hit Enter between lines — each line becomes a lin
 - [ ] Build homepage in block editor using Session 2.5 blocks
 - [ ] Publish Home page
 
-### Session 6 — Plugin
+### Session 6 — Live Data
+
+All three sub-sessions use a Google Sheet as the data source, fetched via the Sheets API and cached server-side. Same pattern as the live beer list built in a prior project — Jason to import those files as the starting point.
+
+#### Session 6.1 — Hours Card
+
+- [ ] Replace client-side JS placeholder with Google Sheet-driven hours
+- [ ] Sheet manages open days, open time, and any special-hours overrides
+- [ ] PHP fetches and caches; JS handles open/closed display logic
+
+#### Session 6.2 — Beer List (Club Room page)
+
+- [ ] Pull tap list from the same Google Sheet used by the prior beer list project
+- [ ] Display on the Club Room / Jolly Corks Bar interior page
+
+#### Session 6.3 — Calendar & Events
 
 - [ ] Event calendar plugin (separate repo)
-- [ ] Stripe ticketing integration
+- [ ] Stripe ticketing integration (Checkout + webhooks)
 - [ ] Replace `events-band.php` static placeholder with live plugin output
+- [ ] CPTs: events, ticket types, orders
 
 ---
 
@@ -154,9 +174,11 @@ Feature Split heading field: hit Enter between lines — each line becomes a lin
 
 **Content management:** Custom Gutenberg blocks for all homepage sections. No ACF. Sidebar inspector pattern — all fields in the right panel, no live canvas preview. Appropriate for one-off layout blocks.
 
-**Hours card:** Client-side JavaScript, hardcoded schedule. Flagged for replacement with a real data source after launch.
+**Hours card:** Google Sheet-driven via Sheets API, cached server-side. Replaced the client-side JS placeholder in Session 6.1. Sheet controls open days, open time, and special-hours overrides.
 
-**Member Area:** Nav CTA points to a future member portal. Content that doesn't require authentication should not be gated behind login — scope risk for MVP.
+**Member Area:** No login gate. The Member Area nav item and section exist for content that's only relevant to current members (dues link, Slack invite, how-to docs), but none of it requires authentication. Maintainability was the deciding factor — login infrastructure is a handoff liability that's not worth the MVP scope.
+
+**Live data pattern:** Google Sheets as the CMS for hours and beer list. Fetched via Sheets API, cached server-side. Jason to import files from the prior beer list project as the starting point for Sessions 6.1 and 6.2.
 
 **Lodge history:** Founded 1882. As of 2026, that's 144 years. Do not use "oldest lodge west of the Mississippi" — San Francisco Lodge #3 holds that distinction.
 

@@ -23,11 +23,12 @@ $steps           = $args['steps']           ?? [];
     <div class="steps-grid">
         <?php foreach ( $steps as $step ) : ?>
             <div class="step">
-                <?php if ( ! empty( $step['image_url'] ) ) : ?>
-                    <img class="step-photo"
-                         src="<?php echo esc_url( $step['image_url'] ); ?>"
-                         alt="<?php echo esc_attr( $step['image_alt'] ?? '' ); ?>">
-                <?php endif; ?>
+                <?php
+                $step_img = $step['image_url'] ?: denver17_placeholder( 600, 450, ( $step['title'] ?? 'Step' ) . ' Photo' );
+                ?>
+                <img class="step-photo"
+                     src="<?php echo esc_url( $step_img ); ?>"
+                     alt="<?php echo esc_attr( $step['image_alt'] ?? '' ); ?>">
                 <div class="step-num"><?php echo esc_html( $step['num'] ); ?></div>
                 <h3 class="step-title"><?php echo esc_html( $step['title'] ); ?></h3>
                 <p class="step-body"><?php echo nl2br( esc_html( $step['body'] ) ); ?></p>
