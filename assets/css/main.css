@@ -408,6 +408,18 @@ nav.site-nav {
   box-shadow: 0 0 0 3px rgba(63,174,92,0.18);
 }
 
+/* OPENS LATER TODAY — amber dot */
+.hours-status-row.is-opens-at .hours-dot {
+  background: #D4900A;
+  box-shadow: 0 0 0 3px rgba(212,144,10,0.18);
+}
+
+/* CLOSED TODAY — red dot */
+.hours-status-row.is-closed .hours-dot {
+  background: #D94F4F;
+  box-shadow: 0 0 0 3px rgba(217,79,79,0.18);
+}
+
 .hours-status {
   font-size: 11px;
   font-weight: 700;
@@ -416,7 +428,9 @@ nav.site-nav {
   color: var(--p400);
 }
 
-.hours-status-row.is-open .hours-status { color: #2E8B4F; }
+.hours-status-row.is-open .hours-status    { color: #2E8B4F; }
+.hours-status-row.is-opens-at .hours-status { color: #9A6200; }
+.hours-status-row.is-closed .hours-status   { color: #B03030; }
 
 .hours-date {
   font-size: 11px;
@@ -437,10 +451,22 @@ nav.site-nav {
   margin: 16px 0;
 }
 
-.hours-week {
+/* Base hours display lines — content written by JS from Sheets data */
+.hours-base {
   font-size: 13px;
   font-weight: 600;
   color: var(--p600);
+}
+
+.hours-base--2 { margin-top: 4px; }
+
+/* Special notice line — hidden until JS populates it */
+.hours-special {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  margin-top: 10px;
+  line-height: 1.4;
 }
 
 .hours-note {

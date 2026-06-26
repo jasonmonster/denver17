@@ -25,6 +25,11 @@ function denver17_enqueue_assets() {
         $version,
         true // Load in footer
     );
+
+    // Pass hours data from Google Sheets (via hours-feed.php) to main.js.
+    // JS reads window.denver17Hours to drive the hours card UI.
+    // open_time / close_time are 24h strings ("17:30") or empty ("" = closed).
+    wp_localize_script( 'denver17-main', 'denver17Hours', denver17_get_hours_data() );
 }
 add_action( 'wp_enqueue_scripts', 'denver17_enqueue_assets' );
 
