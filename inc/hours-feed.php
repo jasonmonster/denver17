@@ -174,7 +174,7 @@ function denver17_get_hours_data() {
             if ( '' === $date_raw ) continue;
 
             // Strip day-of-week prefix if present ("Friday, June 26" -> "June 26")
-            $date_clean = preg_replace( '/^[A-Za-z]+,\s*/', '', $date_raw );
+            $date_clean = trim( preg_replace( '/^[A-Za-z]+,\s*/', '', $date_raw ) );
             // Append current year if missing so strtotime is unambiguous
             if ( ! preg_match( '/\d{4}/', $date_clean ) ) {
                 $date_clean .= ', ' . date( 'Y' );
