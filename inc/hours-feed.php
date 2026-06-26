@@ -31,7 +31,13 @@
 // ── Configuration ─────────────────────────────────────────────────────────────
 
 if ( ! defined( 'DENVER17_HOURS_SHEET_ID' ) ) {
-    define( 'DENVER17_HOURS_SHEET_ID', '1nzzm33T7WYOG0Z--vBg2v0VvbuXhog_RGoik2a2eFhQ' ); // TODO: paste your Sheet ID here
+    define( 'DENVER17_HOURS_SHEET_ID', '1nzzm33T7WYOG0Z--vBg2v0VvbuXhog_RGoik2a2eFhQ' );
+}
+
+// Published document ID — the 2PACX-... string from File → Share → Publish to web.
+// More reliable than the sheet ID for server-side fetches.
+if ( ! defined( 'DENVER17_HOURS_PUBLISH_ID' ) ) {
+    define( 'DENVER17_HOURS_PUBLISH_ID', '2PACX-1vTpsdpLGObr0ZJ7gpqZeGibCG44OlE6KLdzIDVvgQk68JFjDz6uS291xY-WyU_CwA5HAXZO298emlvX' ); // TODO: paste your 2PACX-... ID here
 }
 
 if ( ! defined( 'DENVER17_HOURS_CACHE_TTL' ) ) {
@@ -48,11 +54,20 @@ if ( ! defined( 'DENVER17_HOURS_CACHE_TTL' ) ) {
  * @return array[]|false            Array of string arrays, or false on failure.
  */
 function denver17_fetch_sheet_tab( $sheet_name ) {
-    $sheet_id = DENVER17_HOURS_SHEET_ID;
-    if ( empty( $sheet_id ) ) return false;
+    $publish_id = DENVER17_HOURS_PUBLISH_ID;
+    $sheet_id   = DENVER17_HOURS_SHEET_ID;
 
-    $url = 'https://docs.google.com/spreadsheets/d/' . $sheet_id . '/gviz/tq'
-         . '?tqx=out:csv&sheet=' . rawurlencode( $sheet_name );
+    if ( ! empty( $publish_id ) ) {
+        // Published URL — most reliable, no sharing configuration required
+        $url = 'https://docs.google.com/spreadsheets/d/e/' . $publish_id
+             . '/pub?output=csv&sheet=' . rawurlencode( $sheet_name );
+    } elseif ( ! empty( $sheet_id ) ) {
+        // Fall back to gviz/tq with regular sheet ID (requires "Anyone with link")
+        $url = 'https://docs.google.com/spreadsheets/d/' . $sheet_id . '/gviz/tq'
+             . '?tqx=out:csv&sheet=' . rawurlencode( $sheet_name );
+    } else {
+        return false;
+    }
 
     $response = wp_remote_get( $url, [
         'timeout'   => 8,
