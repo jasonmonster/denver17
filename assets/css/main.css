@@ -119,17 +119,23 @@ nav.site-nav {
   height: 16px;
 }
 
-.nav-item > span {
+/* Top-level labels (has-children items) and links (leaf items) */
+.nav-item > span,
+.nav-item > a.nav-item-label {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--p100);
   transition: color .15s ease;
-  pointer-events: none;
+  text-decoration: none;
 }
 
-.nav-item:hover > span { color: var(--p50); }
+/* Spans belong to items with mega menus — hover navigates via the dropdown */
+.nav-item > span { pointer-events: none; }
+
+.nav-item:hover > span,
+.nav-item:hover > a.nav-item-label { color: var(--p50); }
 
 .nav-right {
   display: flex;
@@ -624,7 +630,7 @@ nav.site-nav {
   min-height: 360px;
   overflow: hidden;
   border-radius: 8px;
-  background: var(--p800); /* visible when no image is set */
+  background: var(--p800);
 }
 
 .eb-card img {
