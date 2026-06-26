@@ -21,12 +21,12 @@
 // ── Configuration ─────────────────────────────────────────────────────────────
 
 if ( ! defined( 'DENVER17_BEER_SHEET_ID' ) ) {
-    define( 'DENVER17_BEER_SHEET_ID', '' ); // Regular sheet ID from the URL
+    define( 'DENVER17_BEER_SHEET_ID', '12nAaigkObox5quG1pFPFCI1Y3IMBYP2qvwBQf0MiPFc' ); // Regular sheet ID from the URL
 }
 
 // The 2PACX-... string from File → Share → Publish to web (preferred).
 if ( ! defined( 'DENVER17_BEER_PUBLISH_ID' ) ) {
-    define( 'DENVER17_BEER_PUBLISH_ID', '' ); // TODO: paste your 2PACX-... ID here
+    define( 'DENVER17_BEER_PUBLISH_ID', '2PACX-1vQEbb-eBkkatv-uDxUE8i1UNQp5LJROdi5siffD697HQdTLZtVdgmGJxJYteDVI08Le9WqAEYos2nPu' ); // TODO: paste your 2PACX-... ID here
 }
 
 // Tab name exactly as it appears in Google Sheets.
