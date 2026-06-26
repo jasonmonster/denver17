@@ -190,16 +190,19 @@ WP_CLI::success( "Footer Navigation created:  [{$footer_id}]" );
 
 // =============================================================================
 // HELPERS
+//
+// NOTE: wp_update_nav_menu_item() passes menu-item-classes directly into
+// explode(), so it must be a space-separated string — NOT a PHP array.
 // =============================================================================
 
 /**
  * Add a page-type menu item.
  *
- * @param int   $menu_id        Menu term ID
- * @param int   $page_id        Page post ID
- * @param int   $parent_item_id Parent menu item ID (0 = top-level)
- * @param array $classes        CSS classes for the walker (e.g. ['mega-col-break'])
- * @return int  New menu item ID
+ * @param int    $menu_id        Menu term ID
+ * @param int    $page_id        Page post ID
+ * @param int    $parent_item_id Parent menu item ID (0 = top-level)
+ * @param array  $classes        CSS classes for the walker (e.g. ['mega-col-break'])
+ * @return int   New menu item ID
  */
 function d17_rb_menu_page( $menu_id, $page_id, $parent_item_id = 0, $classes = [] ) {
     return wp_update_nav_menu_item( $menu_id, 0, [
@@ -208,7 +211,7 @@ function d17_rb_menu_page( $menu_id, $page_id, $parent_item_id = 0, $classes = [
         'menu-item-type'      => 'post_type',
         'menu-item-status'    => 'publish',
         'menu-item-parent-id' => $parent_item_id,
-        'menu-item-classes'   => $classes,
+        'menu-item-classes'   => implode( ' ', $classes ), // must be a string
     ] );
 }
 
@@ -228,7 +231,7 @@ function d17_rb_menu_custom( $menu_id, $title, $parent_item_id = 0, $classes = [
         'menu-item-type'      => 'custom',
         'menu-item-status'    => 'publish',
         'menu-item-parent-id' => $parent_item_id,
-        'menu-item-classes'   => $classes,
+        'menu-item-classes'   => implode( ' ', $classes ), // must be a string
     ] );
 }
 
@@ -286,17 +289,17 @@ WP_CLI::success( "  Visit + 4 children [{$visit}]" );
 //
 $learn = d17_rb_menu_page( $primary_id, $ids['learn'] );
 // Col 1
-d17_rb_menu_custom( $primary_id, 'About 17',                                    $learn, [ 'mega-label' ] );
-d17_rb_menu_page(   $primary_id, $ids['our-lodge'],                              $learn );
-d17_rb_menu_page(   $primary_id, $ids['diversity-and-inclusion'],               $learn );
-d17_rb_menu_page(   $primary_id, $ids['whos-who'],                              $learn );
-d17_rb_menu_page(   $primary_id, $ids['faq'],                                   $learn );
-d17_rb_menu_page(   $primary_id, $ids['history-of-the-elks'],                   $learn, [ 'mega-group-break' ] );
+d17_rb_menu_custom( $primary_id, 'About 17',                                $learn, [ 'mega-label' ] );
+d17_rb_menu_page(   $primary_id, $ids['our-lodge'],                          $learn );
+d17_rb_menu_page(   $primary_id, $ids['diversity-and-inclusion'],           $learn );
+d17_rb_menu_page(   $primary_id, $ids['whos-who'],                          $learn );
+d17_rb_menu_page(   $primary_id, $ids['faq'],                               $learn );
+d17_rb_menu_page(   $primary_id, $ids['history-of-the-elks'],               $learn, [ 'mega-group-break' ] );
 // Col 2
-d17_rb_menu_custom( $primary_id, 'Membership',                                  $learn, [ 'mega-col-break', 'mega-label' ] );
-d17_rb_menu_page(   $primary_id, $ids['how-to-become-a-member'],                $learn );
-d17_rb_menu_page(   $primary_id, $ids['benefits-of-membership'],                $learn );
-d17_rb_menu_page(   $primary_id, $ids['volunteer'],                             $learn, [ 'mega-group-break' ] );
+d17_rb_menu_custom( $primary_id, 'Membership',                              $learn, [ 'mega-col-break', 'mega-label' ] );
+d17_rb_menu_page(   $primary_id, $ids['how-to-become-a-member'],            $learn );
+d17_rb_menu_page(   $primary_id, $ids['benefits-of-membership'],            $learn );
+d17_rb_menu_page(   $primary_id, $ids['volunteer'],                         $learn, [ 'mega-group-break' ] );
 WP_CLI::success( "  Learn + 10 children [{$learn}]" );
 
 // ---- Community ----
@@ -309,18 +312,18 @@ WP_CLI::success( "  Learn + 10 children [{$learn}]" );
 //   [ Soccer Shoot ]
 //
 // Col 2:
-//   [ Military & Veterans ]     ← mega-col-break starts new col
+//   [ Military & Veterans ]     <- mega-col-break starts new col
 //   [ Scholarships ]
 //   [ Scouts ]
 //
 $comm = d17_rb_menu_page( $primary_id, $ids['community'] );
-d17_rb_menu_page( $primary_id, $ids['charitable-giving'],                 $comm );
-d17_rb_menu_page( $primary_id, $ids['casa'],                              $comm );
-d17_rb_menu_page( $primary_id, $ids['hoop-shoot'],                       $comm );
-d17_rb_menu_page( $primary_id, $ids['soccer-shoot'],                     $comm );
-d17_rb_menu_page( $primary_id, $ids['military-and-veterans'],            $comm, [ 'mega-col-break' ] );
-d17_rb_menu_page( $primary_id, $ids['scholarships'],                     $comm );
-d17_rb_menu_page( $primary_id, $ids['scouts'],                           $comm );
+d17_rb_menu_page( $primary_id, $ids['charitable-giving'],              $comm );
+d17_rb_menu_page( $primary_id, $ids['casa'],                           $comm );
+d17_rb_menu_page( $primary_id, $ids['hoop-shoot'],                    $comm );
+d17_rb_menu_page( $primary_id, $ids['soccer-shoot'],                  $comm );
+d17_rb_menu_page( $primary_id, $ids['military-and-veterans'],         $comm, [ 'mega-col-break' ] );
+d17_rb_menu_page( $primary_id, $ids['scholarships'],                  $comm );
+d17_rb_menu_page( $primary_id, $ids['scouts'],                        $comm );
 WP_CLI::success( "  Community + 7 children [{$comm}]" );
 
 // ---- Events & Contact — leaf items (no mega menu) ----
