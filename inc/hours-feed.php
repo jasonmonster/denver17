@@ -159,8 +159,13 @@ function denver17_get_hours_data() {
     $display_line_2 = $base['display_line_2'] ?? '';
 
     // ── Check "Schedule" tab for a date-specific override ────────────────────
-    $today_ymd = current_time( 'Y-m-d' );
-    $today_dow = (int) date( 'w', strtotime( $today_ymd ) );
+    // Use WP's configured timezone (America/Denver) for all date comparisons.
+    // PHP's date() uses the server timezone (UTC on this host), which causes
+    // the date to drift by up to 6 hours and match the wrong schedule row.
+    $wp_tz     = wp_timezone();
+    $now_local = new DateTime( 'now', $wp_tz );
+    $today_ymd = $now_local->format( 'Y-m-d' );
+    $today_dow = (int) $now_local->format( 'w' );
 
     $has_override  = false;
     $today_open    = null; // null = not overridden
@@ -182,8 +187,13 @@ function denver17_get_hours_data() {
             if ( ! preg_match( '/\d{4}/', $date_clean ) ) {
                 $date_clean .= ', ' . date( 'Y' );
             }
-            $ts = strtotime( $date_clean );
-            if ( $ts && date( 'Y-m-d', $ts ) === $today_ymd ) {
+            // Parse as a date-only value anchored to WP's local timezone so
+            // midnight-UTC offsets don't shift the date.
+            $dt = DateTime::createFromFormat( 'F j, Y', $date_clean, $wp_tz );
+            if ( ! $dt ) {
+                $dt = date_create( $date_clean, $wp_tz );
+            }
+            if ( $dt && $dt->format( 'Y-m-d' ) === $today_ymd ) {
                 $has_override  = true;
                 $today_open    = denver17_normalise_time( $row[1] ?? '' );
                 $today_close   = denver17_normalise_time( $row[2] ?? '' );

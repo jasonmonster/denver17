@@ -6,10 +6,6 @@
  * and computes open/closed status server-side. No JS required on inner pages
  * since page caching is disabled for authenticated/dynamic pages.
  *
- * Attributes control which sections render — design can be refined later
- * by styling .hours-display and its children in main.css without touching
- * this file or the block attributes.
- *
  * Status modifier classes on the wrapper:
  *   .hours-display--open       currently open
  *   .hours-display--opens-at   open today but not yet
@@ -24,50 +20,51 @@ function denver17_render_block_hours_display( $attributes ) {
     $display_1  = $data['display_1']  ?? '';
     $display_2  = $data['display_2']  ?? '';
 
-    // ── Compute status server-side ────────────────────────────────────────────
+    // ── Compute status in WP's local timezone (server runs UTC) ──────────────
+    $wp_tz     = wp_timezone();
+    $now_local = new DateTime( 'now', $wp_tz );
+    $now_decimal = (float) $now_local->format( 'G' ) + (float) $now_local->format( 'i' ) / 60;
+
     $open_decimal = null;
     if ( $open_time ) {
         $parts        = explode( ':', $open_time );
         $open_decimal = (int) $parts[0] + (int) ( $parts[1] ?? 0 ) / 60;
     }
 
-    $now_ts      = current_time( 'timestamp' );
-    $now_decimal = (float) date( 'G', $now_ts ) + (float) date( 'i', $now_ts ) / 60;
-
     $is_open_today = $open_decimal !== null;
     $is_open_now   = $is_open_today && $now_decimal >= $open_decimal;
+
+    // Format open time for display (e.g. "17:30" → "5:30 PM")
+    $open_fmt  = '';
+    $close_fmt = 'Close';
+    if ( $open_time ) {
+        $open_ts  = strtotime( $open_time );
+        $open_fmt = $open_ts ? date( 'g:i A', $open_ts ) : $open_time;
+    }
+    if ( $close_time ) {
+        $close_ts  = strtotime( $close_time );
+        $close_fmt = $close_ts ? date( 'g:i A', $close_ts ) : $close_time;
+    }
 
     if ( ! $is_open_today ) {
         $status      = 'closed';
         $status_text = 'Closed today';
+        $range       = '';
     } elseif ( $is_open_now ) {
         $status      = 'open';
         $status_text = 'We&rsquo;re open';
+        // When no fixed close time, "Open until close" is awkward — show open time instead.
+        $range = $close_time
+            ? 'Open until ' . esc_html( $close_fmt )
+            : 'Open at ' . esc_html( $open_fmt );
     } else {
         $status      = 'opens-at';
-        $open_ts     = strtotime( $open_time );
-        $open_fmt    = $open_ts ? date( 'g:i A', $open_ts ) : $open_time;
         $status_text = 'Opens at ' . esc_html( $open_fmt );
-    }
-
-    // ── Format today's time range ─────────────────────────────────────────────
-    $range = '';
-    if ( $open_time ) {
-        $open_ts  = strtotime( $open_time );
-        $open_fmt = $open_ts ? date( 'g:i A', $open_ts ) : $open_time;
-
-        if ( $close_time ) {
-            $close_ts  = strtotime( $close_time );
-            $close_fmt = $close_ts ? date( 'g:i A', $close_ts ) : $close_time;
-        } else {
-            $close_fmt = 'Close';
-        }
-
-        $range = esc_html( $open_fmt ) . '&ndash;' . esc_html( $close_fmt );
+        $range       = esc_html( $open_fmt ) . '&ndash;' . esc_html( $close_fmt );
     }
 
     // ── Today's date label ────────────────────────────────────────────────────
-    $date_label = date_i18n( 'l, F j', $now_ts );
+    $date_label = $now_local->format( 'l, F j' );
 
     // ── Attribute flags ───────────────────────────────────────────────────────
     $show_status     = (bool) ( $attributes['showStatus']    ?? true );
@@ -114,6 +111,7 @@ function denver17_render_block_hours_display( $attributes ) {
 
         <?php if ( $show_note ) : ?>
             <p class="hours-display__note">Hours subject to change for special events.</p>
+            <p class="hours-display__note">Closing time is at bartender&rsquo;s discretion.</p>
         <?php endif; ?>
 
     </div>

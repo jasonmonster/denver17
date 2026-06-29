@@ -33,6 +33,7 @@
     <div class="hours-base hours-base--2" id="hoursBase2" hidden></div>
 
     <p class="hours-note">Hours subject to change for special events.</p>
+    <p class="hours-note">Closing time is at bartender&rsquo;s discretion.</p>
 
     <a class="hours-link" href="<?php echo esc_url( home_url( '/visit/' ) ); ?>">
         See full hours &rarr;

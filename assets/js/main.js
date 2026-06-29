@@ -113,9 +113,11 @@
     } else if ( isOpenNow ) {
       row.classList.add( 'is-open' );
       statusEl.textContent = 'We\u2019re open';
+      // When there's no fixed close time, "Open until close" is awkward.
+      // Show the open time instead so the card stays informative.
       rangeEl.textContent  = h.close_time
         ? 'Open until ' + closeFormatted
-        : 'Open until close';
+        : 'Open at ' + openFormatted;
 
     } else {
       row.classList.add( 'is-opens-at' );
