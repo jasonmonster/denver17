@@ -108,7 +108,7 @@
     if ( ! isOpenToday ) {
       row.classList.add( 'is-closed' );
       statusEl.textContent = 'Closed today';
-      rangeEl.textContent  = '\u2014';
+      rangeEl.hidden = true;
 
     } else if ( isOpenNow ) {
       row.classList.add( 'is-open' );
