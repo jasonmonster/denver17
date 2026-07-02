@@ -108,18 +108,18 @@ function d17ip_block( $name, $attrs = [] ) {
     return '<!-- wp:' . $name . ' ' . $json . ' /-->';
 }
 
-/** Finds a page by its own slug, regardless of parent. get_page_by_path()
- * reconstructs a page's full ancestor path and compares it against what you
- * pass in — so a bare slug like 'facilities' only ever matches a page with
- * no parent. Every nested page needs this instead. */
+/** Finds a page by its own slug, regardless of parent or status. Two prior
+ * bugs lived here: get_page_by_path() only matches pages with no parent,
+ * and get_posts( [ 'post_status' => 'any' ] ) silently excludes draft/private
+ * posts when there's no logged-in user with permission to see them — which
+ * is WP-CLI's default context. Direct query sidesteps both. */
 function d17ip_find( $slug ) {
-    $posts = get_posts( [
-        'post_type'   => 'page',
-        'post_status' => 'any',
-        'name'        => $slug,
-        'numberposts' => 1,
-    ] );
-    return $posts ? $posts[0] : null;
+    global $wpdb;
+    $id = $wpdb->get_var( $wpdb->prepare(
+        "SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = 'page' AND post_status != 'trash' LIMIT 1",
+        $slug
+    ) );
+    return $id ? get_post( (int) $id ) : null;
 }
 
 /** Resolves a real permalink for a page slug created by bin/setup.php. */

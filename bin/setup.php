@@ -106,20 +106,20 @@ $footer_nav_slugs = [ 'contact', 'member-area' ];
 // =============================================================================
 
 /**
- * Get a page ID by slug, regardless of parent. get_page_by_path() walks a
- * page's ancestor chain and compares the reconstructed path against what
- * you pass in — a bare slug like 'facilities' only matches if that page
- * has no parent, which silently broke this check for every nested page
- * and caused duplicate pages on rerun. Returns 0 if not found.
+ * Get a page ID by slug, regardless of parent or status. Two prior bugs
+ * lived here: get_page_by_path() only matches pages with no parent, and
+ * get_posts( [ 'post_status' => 'any' ] ) silently excludes draft/private
+ * posts when there's no logged-in user with permission to see them —
+ * which is WP-CLI's default context. A direct query sidesteps both.
+ * Returns 0 if not found.
  */
 function d17_get_page_id( $slug ) {
-    $posts = get_posts( [
-        'post_type'   => 'page',
-        'post_status' => 'any',
-        'name'        => $slug,
-        'numberposts' => 1,
-    ] );
-    return $posts ? $posts[0]->ID : 0;
+    global $wpdb;
+    $id = $wpdb->get_var( $wpdb->prepare(
+        "SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = 'page' AND post_status != 'trash' LIMIT 1",
+        $slug
+    ) );
+    return $id ? (int) $id : 0;
 }
 
 /**

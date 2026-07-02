@@ -23,17 +23,17 @@
 // HELPERS
 // =============================================================================
 
-// Same bug as bin/setup.php: get_page_by_path() only matches a bare slug
-// against pages with no parent, since it compares the full ancestor path.
-// Every nested page needs a direct post_name lookup instead.
+// Two prior bugs lived here: get_page_by_path() only matches pages with
+// no parent, and get_posts( [ 'post_status' => 'any' ] ) silently excludes
+// draft/private posts under WP-CLI's default no-user context. Direct query
+// sidesteps both.
 function d17_page_id( $slug ) {
-    $posts = get_posts( [
-        'post_type'   => 'page',
-        'post_status' => 'any',
-        'name'        => $slug,
-        'numberposts' => 1,
-    ] );
-    return $posts ? $posts[0]->ID : 0;
+    global $wpdb;
+    $id = $wpdb->get_var( $wpdb->prepare(
+        "SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND post_type = 'page' AND post_status != 'trash' LIMIT 1",
+        $slug
+    ) );
+    return $id ? (int) $id : 0;
 }
 
 /**
