@@ -108,9 +108,23 @@ function d17ip_block( $name, $attrs = [] ) {
     return '<!-- wp:' . $name . ' ' . $json . ' /-->';
 }
 
+/** Finds a page by its own slug, regardless of parent. get_page_by_path()
+ * reconstructs a page's full ancestor path and compares it against what you
+ * pass in — so a bare slug like 'facilities' only ever matches a page with
+ * no parent. Every nested page needs this instead. */
+function d17ip_find( $slug ) {
+    $posts = get_posts( [
+        'post_type'   => 'page',
+        'post_status' => 'any',
+        'name'        => $slug,
+        'numberposts' => 1,
+    ] );
+    return $posts ? $posts[0] : null;
+}
+
 /** Resolves a real permalink for a page slug created by bin/setup.php. */
 function d17ip_url( $slug ) {
-    $page = get_page_by_path( $slug );
+    $page = d17ip_find( $slug );
     return $page ? get_permalink( $page->ID ) : '#';
 }
 
@@ -555,7 +569,7 @@ $updated = 0;
 $skipped = 0;
 
 foreach ( $pages as $slug => $content ) {
-    $page = get_page_by_path( $slug );
+    $page = d17ip_find( $slug );
 
     if ( ! $page ) {
         WP_CLI::warning( "  Not found, skipping: {$slug} (run bin/setup.php or bin/rebuild.php first)" );

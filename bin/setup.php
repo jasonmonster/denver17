@@ -106,11 +106,20 @@ $footer_nav_slugs = [ 'contact', 'member-area' ];
 // =============================================================================
 
 /**
- * Get a page ID by slug. Returns 0 if not found.
+ * Get a page ID by slug, regardless of parent. get_page_by_path() walks a
+ * page's ancestor chain and compares the reconstructed path against what
+ * you pass in — a bare slug like 'facilities' only matches if that page
+ * has no parent, which silently broke this check for every nested page
+ * and caused duplicate pages on rerun. Returns 0 if not found.
  */
 function d17_get_page_id( $slug ) {
-    $page = get_page_by_path( $slug );
-    return $page ? $page->ID : 0;
+    $posts = get_posts( [
+        'post_type'   => 'page',
+        'post_status' => 'any',
+        'name'        => $slug,
+        'numberposts' => 1,
+    ] );
+    return $posts ? $posts[0]->ID : 0;
 }
 
 /**

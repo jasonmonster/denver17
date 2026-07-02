@@ -23,9 +23,17 @@
 // HELPERS
 // =============================================================================
 
+// Same bug as bin/setup.php: get_page_by_path() only matches a bare slug
+// against pages with no parent, since it compares the full ancestor path.
+// Every nested page needs a direct post_name lookup instead.
 function d17_page_id( $slug ) {
-    $page = get_page_by_path( $slug );
-    return $page ? $page->ID : 0;
+    $posts = get_posts( [
+        'post_type'   => 'page',
+        'post_status' => 'any',
+        'name'        => $slug,
+        'numberposts' => 1,
+    ] );
+    return $posts ? $posts[0]->ID : 0;
 }
 
 /**
