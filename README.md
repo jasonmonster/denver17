@@ -48,6 +48,7 @@ Local repo path: `/Users/jasonackerman/Dropbox (Personal)/Overtime Agency/BPOE 1
 | `inc/template-functions.php` | Helper functions — `denver17_social_links()` outputs SVG icons |
 | `inc/blocks.php` | Block registration, custom category, editor script enqueue |
 | `inc/hours-feed.php` | Fetches lodge hours from Google Sheets, caches via WP transients (5 min TTL) |
+| `inc/beer-feed.php` | Fetches tap list from Google Sheets, caches via WP transients (5 min TTL) |
 | `header.php` | Nav with mega menu, social icons, Member Area CTA |
 | `footer.php` | Footer with social links and footer nav |
 | `front-page.php` | Homepage — renders via `the_content()` using custom blocks |
@@ -65,12 +66,14 @@ Local repo path: `/Users/jasonackerman/Dropbox (Personal)/Overtime Agency/BPOE 1
 | `blocks/membership-steps/` | `block.json` + `render.php` |
 | `blocks/events-band/` | `block.json` + `render.php` |
 | `blocks/cta-band/` | `block.json` + `render.php` |
-| `blocks/hours-display/` | `block.json` + `render.php` — for When & Where page; server-side status computation |
-| `assets/css/main.css` | All front-end styles; `--gold` references Customizer `--color-accent` |
+| `blocks/hours-display/` | `block.json` + `render.php` — When & Where page; server-side status via `wp_timezone()` + `DateTime` |
+| `blocks/beer-list/` | `block.json` + `render.php` — Jolly Corks Bar page; sidebar toggles for style, ABV, coming soon |
+| `assets/css/main.css` | All front-end styles |
 | `assets/css/editor-style.css` | Block editor canvas styles |
 | `assets/js/main.js` | Mobile drawer, accordion toggles, hours card state rendering (reads `window.denver17Hours`) |
-| `assets/js/blocks-editor.js` | Block editor UI — all 6 blocks, no build step, vanilla `wp.*` globals |
+| `assets/js/blocks-editor.js` | Block editor UI — all 7 blocks, no build step, vanilla `wp.*` globals |
 | `bin/setup.php` | WP-CLI one-time site setup script |
+| `bin/populate-inner-pages.php` | WP-CLI content import — writes final copy into every inner page in one pass. See doc comment at top of file for what still needs manual input (officer names, a few Community pages, Customizer contact fields) |
 | `.github/workflows/deploy.yml` | GitHub Actions deploy to staging |
 
 ---
@@ -95,7 +98,9 @@ Feature Split heading field: hit Enter between lines — each line becomes a lin
 
 ## Block Editor — Inner Pages
 
-**Hours Display** (`denver17/hours-display`) — drop on the When & Where page. Pulls from the same Google Sheets source as the homepage hours card. Status computed server-side. Sidebar toggles control which sections render (status indicator, special notice, base hours, note). Optional heading field.
+**Hours Display** (`denver17/hours-display`) — drop on the When & Where page. Pulls from the same Google Sheets source as the homepage hours card. Status computed server-side using `wp_timezone()` and `DateTime`. Sidebar toggles control which sections render (status indicator, special notice, base hours, note). Optional heading field.
+
+**Beer List** (`denver17/beer-list`) — drop on the Jolly Corks Bar page. Pulls live tap list from Google Sheets. Sidebar toggles for showing style, ABV, and coming soon section. Optional heading field (defaults to "On Tap"). Beers sorted by the Order column in the sheet.
 
 ---
 
@@ -126,6 +131,27 @@ Leave Open Time blank on closed days. Date format: `Day, Month D` (Google Sheets
 **Dev testing:** Append `?hours=open`, `?hours=opens_at`, or `?hours=closed` to any URL to force a state without waiting for the clock.
 
 **Cache bust:** `wp transient delete denver17_hours_data`
+
+---
+
+## Beer List — Google Sheets Setup
+
+`inc/beer-feed.php` fetches from a published Google Sheet and caches for 5 minutes.
+
+**Constants in `inc/beer-feed.php`:**
+- `DENVER17_BEER_SHEET_ID` — regular sheet ID
+- `DENVER17_BEER_PUBLISH_ID` — the `2PACX-...` string (preferred)
+- `DENVER17_BEER_SHEET_NAME` — tab name, default `Beers`
+
+**Tab: "Beers"**
+| A: ID | B: Name | C: Style | D: ABV | E: Status | F: Order |
+|-------|---------|----------|--------|-----------|----------|
+| 1 | Coors Banquet | American Lager | 5.0 | On Tap | 1 |
+| 2 | Modelo Especial | Mexican Lager | 5.4 | On Tap | 2 |
+
+Status values: `On Tap`, `Coming Soon`, `Not In Stock`. Only the first two are displayed. Order column controls sort within each section; blank = sort last.
+
+**Cache bust:** `wp transient delete denver17_beer_data`
 
 ---
 
@@ -175,10 +201,17 @@ Leave Open Time blank on closed days. Date format: `Day, Month D` (Google Sheets
 
 - [x] `inc/hours-feed.php` — fetches Schedule + Base Hours tabs, caches via WP transients
 - [x] `inc/enqueue.php` — `wp_localize_script` passes hours data as `window.denver17Hours`
-- [x] `template-parts/home/hours-card.php` — restructured; JS drives all dynamic content
-- [x] `assets/js/main.js` — `initHoursCard()` reads localized data; `?hours=` URL param for dev testing
+- [x] `template-parts/home/hours-card.php` — restructured; JS drives all dynamic content; range hidden when closed
+- [x] `assets/js/main.js` — `initHoursCard()` reads localized data; `?hours=` URL param for dev testing; "Open at [time]" when no fixed close
 - [x] `assets/css/main.css` — amber (opens-at) and red (closed) dot states; `.hours-special`, `.hours-base`
-- [x] `blocks/hours-display/` — `denver17/hours-display` block for When & Where page; server-side status; sidebar toggles for all sections
+- [x] `blocks/hours-display/` — `denver17/hours-display` block for When & Where page; server-side status using `wp_timezone()` + `DateTime`; sidebar toggles for all sections
+- [x] "Closing time is at bartender's discretion." note added to both card and block
+
+### ✅ Session 6.2 — Beer List (Live Data)
+
+- [x] `inc/beer-feed.php` — fetches Beers tab, parses columns A–F, sorts by Order column, caches via WP transients
+- [x] `blocks/beer-list/` — `denver17/beer-list` block; sidebar toggles for style, ABV, coming soon; empty-state fallback message
+- [x] `inc/blocks.php` + `functions.php` + `assets/js/blocks-editor.js` — registered and wired
 
 ### Session 5 — Content & Configuration
 
@@ -187,11 +220,11 @@ Leave Open Time blank on closed days. Date format: `Day, Month D` (Google Sheets
 - [ ] Set social URLs, phone, address in Customizer → Contact & Social
 - [ ] Build homepage in block editor using blocks
 - [ ] Publish Home page
-
-### Session 6.2 — Beer List (Club Room page)
-
-- [ ] Pull tap list from Google Sheet (same sheet/pattern as prior beer list project)
-- [ ] Display on the Club Room / Jolly Corks Bar interior page
+- [ ] Run `bin/populate-inner-pages.php` — writes final copy into every inner page as a draft
+- [ ] Fill in Who's Who (officer names change annually — none are hardcoded)
+- [ ] Verify Hoop Shoot, Soccer Shoot, Military & Veterans, and Scouts before publishing — these had no usable content on the old site, or (Scouts) had stale 2021 data that was deliberately left out
+- [ ] Add real photos in place of `denver17_placeholder()` slots as they come in
+- [ ] Publish inner pages once reviewed
 
 ### Session 6.3 — Calendar & Events
 
@@ -210,11 +243,17 @@ Leave Open Time blank on closed days. Date format: `Day, Month D` (Google Sheets
 
 **Content management:** Custom Gutenberg blocks for all homepage sections. No ACF. Sidebar inspector pattern — all fields in the right panel, no live canvas preview.
 
-**Hours card:** Google Sheet-driven. `inc/hours-feed.php` fetches Schedule and Base Hours tabs, caches with WP transients (5 min TTL). `DENVER17_HOURS_PUBLISH_ID` (the `2PACX-...` string) is the reliable fetch path — `gviz/tq` with the regular sheet ID fails on this server config. JS handles open/closed/opens-at state client-side from localized data; the `denver17/hours-display` inner page block computes status server-side.
+**Hours card:** Google Sheet-driven. `inc/hours-feed.php` fetches Schedule and Base Hours tabs, caches with WP transients (5 min TTL). `DENVER17_HOURS_PUBLISH_ID` (the `2PACX-...` string) is the reliable fetch path — `gviz/tq` with the regular sheet ID fails on this server config. JS handles open/closed/opens-at state client-side from localized data; the `denver17/hours-display` inner page block computes status server-side. When there's no fixed close time, the card shows "Open at [time]" rather than "Open until close."
+
+**Timezone:** The staging server runs UTC. WP timezone must be set to `America/Denver` in Settings → General. All date/time logic in PHP uses `wp_timezone()` and `DateTime` — never `date()` or `current_time('timestamp')` alone, as those use the server timezone and cause date drift of up to 6 hours.
+
+**Beer list:** Google Sheet-driven via `inc/beer-feed.php`. Same published CSV URL pattern as hours. Sheet columns: A=ID, B=Name, C=Style, D=ABV, E=Status, F=Order. Status values are `On Tap`, `Coming Soon`, `Not In Stock`. Beers sorted by Order column within each section. The sheet format (Web page vs CSV) in the Publish to web dialog doesn't matter — we construct the CSV URL directly from the `2PACX-...` ID regardless of what format was selected when publishing.
 
 **Member Area:** No login gate. The Member Area nav item exists for content relevant to current members (dues link, Slack invite, how-to docs), but no authentication is implemented. Maintainability was the deciding factor.
 
-**Live data pattern:** Google Sheets as the CMS for hours (and beer list in 6.2). Fetch via published CSV URL (`/d/e/2PACX-.../pub?output=csv&sheet=TabName`), cached server-side. The `gviz/tq` endpoint is unreliable on this host even with correct sharing settings — always use the published URL.
+**Live data pattern:** Google Sheets as the CMS for hours and beer list. Fetch via published CSV URL (`/d/e/2PACX-.../pub?output=csv&sheet=TabName`), cached server-side with WP transients. The `gviz/tq` endpoint is unreliable on this host even with correct sharing settings — always use the published URL.
+
+**Google Sheets date format:** Dates in the Schedule tab export as `Day, Month D` with a trailing non-breaking space (`\u00A0`, 2 bytes UTF-8). PHP's `trim()` won't catch it — use `preg_replace('/\s+$/u', '', $str)` with the Unicode flag. Strip the day-of-week prefix with `preg_replace('/^[A-Za-z]+,\s*/u', '', $str)`, then append the current year before passing to `DateTime::createFromFormat`.
 
 **Lodge history:** Founded 1882. As of 2026, that's 144 years. Do not use "oldest lodge west of the Mississippi" — San Francisco Lodge #3 holds that distinction.
 
