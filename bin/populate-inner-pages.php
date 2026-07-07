@@ -4,19 +4,20 @@
  *
  * Writes final, rewritten copy (block markup) into every inner page created
  * by bin/setup.php / bin/rebuild.php. This is the rewrite pass and the page
- * build merged into one step — pages come out as populated drafts, ready to
- * open in the block editor and finish (photos, links, review).
+ * build merged into one step — pages come out published, ready to open in
+ * the block editor and finish (photos, links, review).
  *
  * Run via WP-CLI on staging, after setup.php has created the page tree:
  *   wp eval-file bin/populate-inner-pages.php
  *
  * Safe to re-run — looks up each page by slug and overwrites post_content.
- * Leaves every page as 'draft'. Does not touch Home (bin/import-homepage.php)
+ * Publishes every page it touches. Does not touch Home (bin/import-homepage.php)
  * or Events (that page is Session 6.3 — the calendar plugin owns it).
  *
  * ─────────────────────────────────────────────────────────────────────────
- * STILL NEEDS YOUR INPUT BEFORE PUBLISHING — this script deliberately does
- * NOT fill these in, since guessing would be worse than leaving them blank:
+ * STILL NEEDS YOUR INPUT — pages publish immediately, but this script
+ * deliberately does NOT fill these in, since guessing would be worse than
+ * leaving them blank:
  *
  *   Who's Who        — no names. Officers are elected annually; add this
  *                       year's Exalted Ruler, trustees, and chairs yourself.
@@ -624,7 +625,7 @@ foreach ( $pages as $slug => $content ) {
     $result = wp_update_post( [
         'ID'           => $page->ID,
         'post_content' => $content,
-        'post_status'  => 'draft',
+        'post_status'  => 'publish',
     ], true );
 
     if ( is_wp_error( $result ) ) {
@@ -639,5 +640,5 @@ foreach ( $pages as $slug => $content ) {
 
 WP_CLI::log( '' );
 WP_CLI::success( "Done. {$updated} pages updated, {$skipped} skipped." );
-WP_CLI::log( 'All pages left as drafts — review in the block editor before publishing.' );
+WP_CLI::log( 'Every page touched is now published — this is staging, review live rather than in a draft queue.' );
 WP_CLI::log( 'See the doc comment at the top of this file for what still needs manual input.' );

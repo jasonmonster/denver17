@@ -1254,13 +1254,13 @@ nav.site-nav {
   margin-bottom: 0.4em;
 }
 
-.entry-content a {
+.entry-content a:not([class]) {
   color: var(--p600);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.entry-content a:hover { color: var(--p900); }
+.entry-content a:not([class]):hover { color: var(--p900); }
 
 .entry-content strong { color: var(--p900); }
 

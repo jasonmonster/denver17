@@ -22,6 +22,7 @@ $heading   = $args['heading']   ?? '';
 $body      = $args['body']      ?? '';
 $link_href = $args['link_href'] ?? '#';
 $link_text = $args['link_text'] ?? 'Learn more';
+$show_link = ! empty( $args['link_text'] );
 $image_url = $args['image_url'] ?? '';
 $image_alt = $args['image_alt'] ?? '';
 $variant   = $args['variant']   ?? 'dark';
@@ -50,9 +51,11 @@ $body_html     = nl2br( esc_html( $body ) );
             <?php endif; ?>
             <h2 class="feature-h"><?php echo $heading_html; ?></h2>
             <p class="feature-body"><?php echo $body_html; ?></p>
+            <?php if ( $show_link ) : ?>
             <a class="feature-link" href="<?php echo esc_url( $link_href ); ?>">
                 <?php echo esc_html( $link_text ); ?>
             </a>
+            <?php endif; ?>
         </div>
 
     <?php else : ?>
@@ -63,9 +66,11 @@ $body_html     = nl2br( esc_html( $body ) );
             <?php endif; ?>
             <h2 class="feature-h"><?php echo $heading_html; ?></h2>
             <p class="feature-body"><?php echo $body_html; ?></p>
+            <?php if ( $show_link ) : ?>
             <a class="feature-link" href="<?php echo esc_url( $link_href ); ?>">
                 <?php echo esc_html( $link_text ); ?>
             </a>
+            <?php endif; ?>
         </div>
 
         <div class="feature-img">
