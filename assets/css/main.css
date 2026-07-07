@@ -1228,13 +1228,15 @@ nav.site-nav {
   margin-right: -48px;
 }
 
-/* .entry-content h2/p set colors for plain prose and win on specificity
-   over .feature-h/.feature-body wherever those live inside page content —
-   same issue as the .cta-btn fix above, different tags. Confirmed via
-   computed styles: .feature-body on the dark variant was rendering at a
-   1.00 contrast ratio, text and background the same color. */
-.entry-content .feature-h    { color: var(--p50); }
+/* .entry-content h2/p set colors (and margins, via the shorthand below) for
+   plain prose and win on specificity over component classes wherever those
+   live inside page content — same issue as the .cta-btn fix above, different
+   properties this time. .feature-body was rendering at a 1.00 contrast
+   ratio (text and background the same color) and .cta-h's centering margin
+   was being flattened to 0, both confirmed via computed styles. */
+.entry-content .feature-h    { color: var(--p50); margin: 0 0 18px; }
 .entry-content .feature-body { color: var(--p200); }
+.entry-content .cta-h        { margin: 0 auto 28px; }
 
 /* Entry content typography
    Governs standard Gutenberg prose blocks (paragraphs, headings, lists, etc.)
