@@ -7,14 +7,25 @@
  */
 
 function denver17_enqueue_assets() {
-    $version = wp_get_theme()->get( 'Version' );
+    $theme_version = wp_get_theme()->get( 'Version' );
+
+    // filemtime() ties each asset's version string to its own last-modified
+    // time, so every deploy busts browser and CDN caches automatically.
+    // The static theme version above did not change between deploys, so
+    // once a browser cached main.css it kept serving that copy indefinitely
+    // even after the file changed on the server.
+    $style_path  = get_template_directory() . '/assets/css/main.css';
+    $script_path = get_template_directory() . '/assets/js/main.js';
+
+    $style_version  = file_exists( $style_path )  ? filemtime( $style_path )  : $theme_version;
+    $script_version = file_exists( $script_path ) ? filemtime( $script_path ) : $theme_version;
 
     // Main stylesheet
     wp_enqueue_style(
         'denver17-style',
         get_template_directory_uri() . '/assets/css/main.css',
         [],
-        $version
+        $style_version
     );
 
     // Main JavaScript
@@ -22,7 +33,7 @@ function denver17_enqueue_assets() {
         'denver17-main',
         get_template_directory_uri() . '/assets/js/main.js',
         [],
-        $version,
+        $script_version,
         true // Load in footer
     );
 
