@@ -220,31 +220,75 @@ $pages['the-jolly-corks-bar'] = implode( "\n\n", [
 $pages['facilities'] = implode( "\n\n", [
     d17ip_p( "Three floors, a beer garden, and enough space to host your whole family reunion or your best friend's wedding reception. Here's what's inside." ),
 
-    d17ip_h( 'Lodge Room' ),
-    d17ip_p( "The main hall — high ceilings, a stage, and room for around 125 people seated at round tables or roughly 200 standing and seated combined. It's where the big stuff happens: weddings, banquets, holiday parties, and Lodge meetings. An optional small bar, the Blind Elk, connects right to the room." ),
-    d17ip_img( d17ip_ph( 900, 600, 'Lodge Room set up for an event' ), 'The Lodge Room' ),
+    d17ip_block( 'denver17/feature-split', [
+        'tag'     => 'Facilities',
+        'heading' => 'Lodge Room',
+        'body'    => "The main hall — high ceilings, a stage, and room for around 125 people seated at round tables or roughly 200 standing and seated combined. It's where the big stuff happens: weddings, banquets, holiday parties, and Lodge meetings. An optional small bar, the Blind Elk, connects right to the room.",
+        'image'   => [ 'url' => d17ip_ph( 700, 800, 'Lodge Room set up for an event' ), 'alt' => 'The Lodge Room' ],
+        'variant' => 'dark',
+        'layout'  => 'image-left',
+    ] ),
 
-    d17ip_h( 'The Club Room' ),
-    d17ip_p( "Upstairs, with the best view in the building — downtown Denver skyline out the window and a fully stocked bar. This is the Jolly Corks Bar and dance floor, open to members during normal hours. Because it's never fully private, we rarely rent it out for events." ),
-    d17ip_img( d17ip_ph( 900, 600, 'The Club Room with downtown view' ), 'The Club Room' ),
+    d17ip_block( 'denver17/feature-split', [
+        'tag'     => 'Facilities',
+        'heading' => 'The Club Room',
+        'body'    => "Upstairs, with the best view in the building — downtown Denver skyline out the window and a fully stocked bar. This is the Jolly Corks Bar and dance floor, open to members during normal hours. Because it's never fully private, we rarely rent it out for events.",
+        'image'   => [ 'url' => d17ip_ph( 700, 800, 'The Club Room with downtown view' ), 'alt' => 'The Club Room' ],
+        'variant' => 'mid',
+        'layout'  => 'text-left',
+    ] ),
 
-    d17ip_h( 'Game Room' ),
-    d17ip_p( "Right behind the Club Room. Pool, darts, and the golf simulators live one floor down — open to members and their guests." ),
-    d17ip_img( d17ip_ph( 900, 600, 'Game Room with pool table' ), 'The Game Room' ),
+    d17ip_block( 'denver17/feature-split', [
+        'tag'     => 'Facilities',
+        'heading' => 'Game Room',
+        'body'    => 'Right behind the Club Room. Pool, darts, and the golf simulators live one floor down — open to members and their guests.',
+        'image'   => [ 'url' => d17ip_ph( 700, 800, 'Game Room with pool table' ), 'alt' => 'The Game Room' ],
+        'variant' => 'dark',
+        'layout'  => 'image-left',
+    ] ),
 
-    d17ip_h( 'Beer Garden' ),
-    d17ip_p( "An open-air space in what used to be the parking lot, with string lights and downtown views. Runs through the warmer months and fills up fast on Friday nights." ),
-    d17ip_img( d17ip_ph( 900, 600, 'Beer garden at night' ), 'The beer garden' ),
+    d17ip_block( 'denver17/feature-split', [
+        'tag'     => 'Facilities',
+        'heading' => 'Beer Garden',
+        'body'    => 'An open-air space in what used to be the parking lot, with string lights and downtown views. Runs through the warmer months and fills up fast on Friday nights.',
+        'image'   => [ 'url' => d17ip_ph( 700, 800, 'Beer garden at night' ), 'alt' => 'The beer garden' ],
+        'variant' => 'mid',
+        'layout'  => 'text-left',
+    ] ),
 
-    d17ip_h( 'Kitchen' ),
-    d17ip_p( "A full commercial kitchen that feeds members and Lodge events, and doubles as a rented commissary kitchen. It's not available for event rentals or outside caterers." ),
+    d17ip_block( 'denver17/feature-split', [
+        'tag'     => 'Facilities',
+        'heading' => 'Kitchen',
+        'body'    => "A full commercial kitchen that feeds members and Lodge events, and doubles as a rented commissary kitchen. It's not available for event rentals or outside caterers.",
+        'image'   => [ 'url' => d17ip_ph( 700, 800, 'Commercial kitchen' ), 'alt' => 'The kitchen' ],
+        'variant' => 'dark',
+        'layout'  => 'image-left',
+    ] ),
 
-    d17ip_h( 'East Wing' ),
-    d17ip_p( "Three floors: a large commercial space on top available for events or office use, rented office and commercial space in the middle, and three golf simulators on the garden level — run in partnership with North High School's girls' and boys' golf teams." ),
-    d17ip_img( d17ip_ph( 900, 600, 'Golf simulator bay' ), 'Golf simulators, East Wing garden level' ),
+    d17ip_block( 'denver17/feature-split', [
+        'tag'     => 'Facilities',
+        'heading' => 'East Wing',
+        'body'    => "Three floors: a large commercial space on top available for events or office use, rented office and commercial space in the middle, and three golf simulators on the garden level — run in partnership with North High School's girls' and boys' golf teams.",
+        'image'   => [ 'url' => d17ip_ph( 700, 800, 'Golf simulator bay' ), 'alt' => 'Golf simulators, East Wing garden level' ],
+        'variant' => 'mid',
+        'layout'  => 'text-left',
+    ] ),
 
-    d17ip_h( 'Conference Room' ),
-    d17ip_p( 'Seats 15. Used for committee meetings, Board of Directors sessions, and other Lodge business.' ),
+    d17ip_block( 'denver17/feature-split', [
+        'tag'     => 'Facilities',
+        'heading' => 'Conference Room',
+        'body'    => 'Seats 15. Used for committee meetings, Board of Directors sessions, and other Lodge business.',
+        'image'   => [ 'url' => d17ip_ph( 700, 800, 'Conference room' ), 'alt' => 'The Conference Room' ],
+        'variant' => 'dark',
+        'layout'  => 'image-left',
+    ] ),
+
+    d17ip_block( 'denver17/cta-band', [
+        'eyebrow'    => 'Facilities',
+        'heading'    => 'Want to host your event in one of these spaces?',
+        'buttonText' => 'Facility Rentals',
+        'buttonUrl'  => d17ip_url( 'facility-rentals' ),
+    ] ),
 ] );
 
 // ---------------------------------------------------------------------------
