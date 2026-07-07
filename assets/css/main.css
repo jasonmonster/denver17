@@ -1092,6 +1092,14 @@ nav.site-nav {
     max-width: calc(100% + 44px);
   }
 
+  .page-entry-content .feature-split,
+  .page-entry-content .cta-band {
+    margin-left: -22px;
+    margin-right: -22px;
+    width: calc(100% + 44px);
+    max-width: calc(100% + 44px);
+  }
+
   /* Single post */
   .single-featured-img { max-height: 240px; }
   .single-featured-img img { max-height: 240px; }
@@ -1208,6 +1216,17 @@ nav.site-nav {
 
 .page-entry-content > .alignwide  { margin-left: auto; margin-right: auto; }
 .page-entry-content > .alignfull  { margin-left: -48px; margin-right: -48px; }
+
+/* Feature Split and CTA Band are full-bleed section blocks, same as they
+   render on the homepage — they need to break out of the 800px prose column
+   the same way alignfull does, without an editor having to toggle anything. */
+.page-entry-content > .feature-split,
+.page-entry-content > .cta-band {
+  max-width: calc(100% + 96px);
+  width: calc(100% + 96px);
+  margin-left: -48px;
+  margin-right: -48px;
+}
 
 /* Entry content typography
    Governs standard Gutenberg prose blocks (paragraphs, headings, lists, etc.)
