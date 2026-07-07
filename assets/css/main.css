@@ -1114,9 +1114,14 @@ nav.site-nav {
    -------------------------------------------------------------------------- */
 
 /* Inner page header sits in normal document flow with a solid background.
+   Matches .page-banner directly below it (--p900, not --p950) so the two
+   read as one continuous panel with the nav pill floating on top — same
+   relationship as the homepage, where the header is transparent over the
+   hero instead. Using --p950 here created a visible hard seam where the
+   header met the banner, since nothing separates two adjacent flat colors.
    The homepage overrides this below with transparent + position absolute. */
 .site-header {
-  background: var(--p950);
+  background: var(--p900);
   padding-top: 20px;
   padding-bottom: 20px;
 }
@@ -1237,6 +1242,13 @@ nav.site-nav {
 .entry-content .feature-h    { color: var(--p50); margin: 0 0 18px; }
 .entry-content .feature-body { color: var(--p200); }
 .entry-content .cta-h        { margin: 0 auto 28px; }
+
+/* Feature Split is a full-bleed section, same as it looks on the homepage —
+   no card treatment. The generic .entry-content img rule below rounds every
+   inline content image, which also caught this component's image since it's
+   an <img> inside .entry-content. Cancels that out so the image fills its
+   half of the section edge-to-edge, sharp corners, matching the homepage. */
+.entry-content .feature-img img { border-radius: 0; }
 
 /* Entry content typography
    Governs standard Gutenberg prose blocks (paragraphs, headings, lists, etc.)

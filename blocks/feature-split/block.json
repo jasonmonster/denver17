@@ -10,7 +10,7 @@
     "tag":      { "type": "string", "default": "" },
     "heading":  { "type": "string", "default": "" },
     "body":     { "type": "string", "default": "" },
-    "linkText": { "type": "string", "default": "Learn more" },
+    "linkText": { "type": "string", "default": "" },
     "linkUrl":  { "type": "string", "default": "" },
     "image":    { "type": "object", "default": {} },
     "variant":  { "type": "string", "default": "dark", "enum": ["dark", "mid"] },
