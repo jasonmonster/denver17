@@ -1252,12 +1252,20 @@ nav.site-nav {
 
 /* Entry content typography
    Governs standard Gutenberg prose blocks (paragraphs, headings, lists, etc.)
-   within any .entry-content area on inner pages. */
+   within any .entry-content area on inner pages.
+
+   Horizontal margin is `auto`, never 0. `.page-entry-content > *` centers every
+   constrained block in the 800px prose column via margin-left/right: auto, but
+   these element rules win on specificity — so a `margin: 2em 0 …` shorthand
+   would flatten that auto to 0 and pin the block to the left edge while
+   paragraphs stay centered. Using `auto` keeps them aligned. Same fix as
+   .cta-h above. Full-bleed sections (.feature-split/.cta-band/.alignfull) opt
+   out separately with their own negative margins. */
 .entry-content h2 {
   font-size: 28px;
   font-weight: 700;
   color: var(--p900);
-  margin: 2em 0 0.6em;
+  margin: 2em auto 0.6em;
   line-height: 1.2;
 }
 
@@ -1265,14 +1273,14 @@ nav.site-nav {
   font-size: 21px;
   font-weight: 700;
   color: var(--p900);
-  margin: 1.75em 0 0.5em;
+  margin: 1.75em auto 0.5em;
 }
 
 .entry-content h4 {
   font-size: 17px;
   font-weight: 700;
   color: var(--p900);
-  margin: 1.5em 0 0.4em;
+  margin: 1.5em auto 0.4em;
 }
 
 .entry-content p {
@@ -1308,7 +1316,7 @@ nav.site-nav {
 .entry-content blockquote {
   border-left: 3px solid var(--gold);
   padding-left: 24px;
-  margin: 2em 0;
+  margin: 2em auto;
   color: var(--p600);
   font-style: italic;
   font-size: 18px;
@@ -1323,10 +1331,10 @@ nav.site-nav {
 .entry-content hr {
   border: none;
   border-top: 1px solid var(--p100);
-  margin: 2.5em 0;
+  margin: 2.5em auto;
 }
 
-.entry-content figure { margin: 2em 0; }
+.entry-content figure { margin: 2em auto; }
 
 .entry-content figcaption {
   font-size: 12px;
