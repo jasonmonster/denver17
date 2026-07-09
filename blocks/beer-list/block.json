@@ -5,11 +5,21 @@
   "title": "Beer List",
   "category": "denver17",
   "description": "Live tap list pulled from Google Sheets. Drop on the Jolly Corks Bar or Club Room page.",
-  "supports": { "html": false, "className": false, "anchor": true },
+  "supports": {
+    "html": false,
+    "className": false,
+    "anchor": true,
+    "align": [ "wide", "full" ]
+  },
   "attributes": {
-    "heading":       { "type": "string",  "default": "On Tap" },
-    "showStyle":     { "type": "boolean", "default": true },
-    "showAbv":       { "type": "boolean", "default": true },
-    "showComingSoon":{ "type": "boolean", "default": true }
+    "align":           { "type": "string" },
+    "variant":         { "type": "string",  "default": "band" },
+    "backgroundImage": { "type": "object",  "default": {} },
+    "eyebrow":         { "type": "string",  "default": "The Jolly Corks Bar" },
+    "heading":         { "type": "string",  "default": "On Tap" },
+    "note":            { "type": "string",  "default": "Updated live from behind the bar." },
+    "showStyle":       { "type": "boolean", "default": true },
+    "showAbv":         { "type": "boolean", "default": true },
+    "showComingSoon":  { "type": "boolean", "default": true }
   }
 }

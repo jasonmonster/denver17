@@ -455,28 +455,79 @@
     title: 'Beer List',
     category: 'denver17',
     description: 'Live tap list from Google Sheets.',
+    // Mirrors block.json — see the note on denver17/hours-display above.
+    supports: {
+      html: false,
+      className: false,
+      anchor: true,
+      align: [ 'wide', 'full' ],
+    },
     attributes: {
-      heading:        { type: 'string',  default: 'On Tap' },
-      showStyle:      { type: 'boolean', default: true },
-      showAbv:        { type: 'boolean', default: true },
-      showComingSoon: { type: 'boolean', default: true },
+      align:           { type: 'string' },
+      variant:         { type: 'string',  default: 'band' },
+      backgroundImage: { type: 'object',  default: {} },
+      eyebrow:         { type: 'string',  default: 'The Jolly Corks Bar' },
+      heading:         { type: 'string',  default: 'On Tap' },
+      note:            { type: 'string',  default: 'Updated live from behind the bar.' },
+      showStyle:       { type: 'boolean', default: true },
+      showAbv:         { type: 'boolean', default: true },
+      showComingSoon:  { type: 'boolean', default: true },
     },
     edit: function ( props ) {
       var attrs      = props.attributes;
       var set        = props.setAttributes;
       var blockProps = useBlockProps();
+      var isBand     = attrs.variant !== 'plain';
 
       return el( Fragment, null,
         el( InspectorControls, null,
+          el( PanelBody, { title: 'Style', initialOpen: true },
+            el( SelectControl, {
+              label: 'Variant',
+              value: attrs.variant,
+              options: [
+                { label: 'Band (dark, full-bleed)', value: 'band' },
+                { label: 'Plain (light, inline)',   value: 'plain' }
+              ],
+              onChange: function ( v ) { set( { variant: v } ); }
+            } ),
+            isBand
+              ? el( 'p', { style: { fontSize: '12px', color: '#757575', margin: '4px 0 16px' } },
+                  'Set the block to Full width in the toolbar so the band reaches both edges.'
+                )
+              : null,
+            isBand
+              ? imagePicker( attrs.backgroundImage, 'Background photo (optional)', function ( img ) {
+                  set( { backgroundImage: img } );
+                } )
+              : null,
+            isBand
+              ? el( 'p', { style: { fontSize: '12px', color: '#757575' } },
+                  'Use the back-bar stained glass or another shot of the room. Do not use a photo of the taps — the list is live and a tap photo goes out of date the moment a keg changes.'
+                )
+              : null
+          ),
           el( PanelBody, { title: 'Content', initialOpen: true },
+            el( TextControl, {
+              label: 'Eyebrow',
+              help:  'Small line above the heading. Leave blank to hide.',
+              value: attrs.eyebrow,
+              onChange: function ( v ) { set( { eyebrow: v } ); }
+            } ),
             el( TextControl, {
               label: 'Heading',
               help:  'Displayed above the tap list. Leave blank to hide.',
               value: attrs.heading,
               onChange: function ( v ) { set( { heading: v } ); }
+            } ),
+            el( TextControl, {
+              label: 'Live note',
+              help:  'Shown next to a pulsing dot. Leave blank to hide both.',
+              value: attrs.note,
+              onChange: function ( v ) { set( { note: v } ); }
             } )
           ),
-          el( PanelBody, { title: 'Display', initialOpen: true },
+          el( PanelBody, { title: 'Display', initialOpen: false },
             el( ToggleControl, {
               label:    'Show beer style',
               checked:  attrs.showStyle,
@@ -495,7 +546,10 @@
           )
         ),
         el( 'div', blockProps,
-          canvasPlaceholder( 'Beer List', 'Live from Google Sheets · renders on front end' )
+          canvasPlaceholder(
+            'Beer List — ' + ( isBand ? 'Band' : 'Plain' ),
+            'Live from Google Sheets · renders on front end'
+          )
         )
       );
     },

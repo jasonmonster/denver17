@@ -1807,62 +1807,275 @@ nav.site-nav {
 
 /* --------------------------------------------------------------------------
    19. Beer List Block (denver17/beer-list)
-   Same situation as Hours Display — working data, no CSS. Read as a plain
-   bulleted list (browser defaults filtered through the generic .entry-content
-   ul/li rules), nothing like the typographic treatment in
-   beer-menu-display.html.
+
+   Two variants. `band` is the default: a full-bleed dark section with an
+   optional photo behind it at low opacity, echoing the in-lodge TV menu
+   (mockups/beer-menu-display.html) without cloning its Bebas Neue type — the
+   site loads no webfonts and adding one for a single block isn't worth the
+   request. Scale, tracking, and the gold accent carry the same weight.
+
+   The photo is never the taps. The list is live from a Google Sheet and any
+   tap photo goes stale the moment a keg changes; the back-bar stained glass
+   is the room's actual identity and can't drift out of sync.
+
+   `plain` is the light inline list, for pages where a dark band is too loud.
+
+   Each row is `name / leader / ABV` on a grid rather than a space-between
+   flex pair. The dotted leader is the printed-menu device that makes a
+   two-column tap list scannable — without it the eye loses the row.
    -------------------------------------------------------------------------- */
-.entry-content .beer-list__items {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 32px;
+
+/* ---- Band variant --------------------------------------------------------- */
+.entry-content .beer-list--band {
+  position: relative;
+  overflow: hidden;
+  background: var(--p950);
+  isolation: isolate;
 }
 
-.entry-content .beer-list__item {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px 16px;
-  padding: 14px 0;
+.entry-content .beer-list--band .beer-list__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.entry-content .beer-list--band .beer-list__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0;
   margin: 0;
-  border-bottom: 1px solid var(--p100);
+  opacity: 0.28;
+  filter: saturate(0.85);
 }
 
-.entry-content .beer-list__item:last-child { border-bottom: none; }
-
-.entry-content .beer-list__name {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--p900);
+/* Left-weighted scrim: keeps the tap names readable over the busy stained
+   glass while the right edge of the photo stays visible. Same gradient logic
+   as .hero-overlay, flipped for a shorter section. */
+.entry-content .beer-list--band .beer-list__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    100deg,
+    rgba(29,26,71,0.97) 0%,
+    rgba(29,26,71,0.92) 45%,
+    rgba(29,26,71,0.62) 80%,
+    rgba(29,26,71,0.45) 100%
+  );
 }
 
-.entry-content .beer-list__meta {
-  font-size: 13px;
-  color: var(--p600);
-  white-space: nowrap;
+.entry-content .beer-list--band .beer-list__inner {
+  position: relative;
+  z-index: 2;
+  padding: 80px 48px;
+  max-width: 1140px;
+  margin: 0 auto;
 }
 
-.entry-content .beer-list__abv { font-weight: 700; color: var(--p800); }
-
-.entry-content .beer-list__empty {
-  font-size: 14px;
-  color: var(--p400);
-  font-style: italic;
+/* When the block isn't full-bleed it still sits in the 800px prose column,
+   so it needs its own breathing room rather than the band's generous padding. */
+.entry-content .beer-list--band:not(.alignfull):not(.alignwide) .beer-list__inner {
+  padding: 48px 40px;
 }
 
-.entry-content .beer-list__coming-soon { margin-top: 8px; }
+/* ---- Header --------------------------------------------------------------- */
+.entry-content .beer-list__head {
+  margin-bottom: 44px;
+}
 
-.entry-content .beer-list__coming-soon-label {
+.entry-content .beer-list__eyebrow {
   font-size: 11px;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--gold);
-  font-weight: 700;
+  font-weight: 600;
+  color: var(--gold-light);
   margin-bottom: 12px;
 }
 
-.entry-content .beer-list__item--coming-soon {
-  opacity: 0.6;
-  border-bottom-style: dashed;
+.entry-content .beer-list__heading {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--p50);
+  margin: 0;
+}
+
+.entry-content .beer-list__note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: var(--p200);
+  margin-top: 16px;
+}
+
+/* Slow pulse signals "this is live data" without a spinner, or a timestamp
+   that would itself go stale behind a page cache. */
+.entry-content .beer-list__pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3FAE5C;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(63,174,92,0.55);
+  animation: beer-pulse 2.6s ease-out infinite;
+}
+
+@keyframes beer-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(63,174,92,0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(63,174,92,0); }
+  100% { box-shadow: 0 0 0 0 rgba(63,174,92,0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-content .beer-list__pulse { animation: none; }
+}
+
+/* ---- Tap list ------------------------------------------------------------- */
+.entry-content .beer-list__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  columns: 2;
+  column-gap: 72px;
+}
+
+.entry-content .beer-list__item {
+  break-inside: avoid;
+  padding: 0 0 22px;
+  margin: 0 0 22px;
+  border-bottom: 1px solid rgba(206,203,246,0.14);
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+.entry-content .beer-list__row {
+  display: grid;
+  grid-template-columns: auto minmax(24px, 1fr) auto;
+  align-items: baseline;
+  gap: 0 10px;
+}
+
+.entry-content .beer-list__name {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--p50);
+  letter-spacing: -0.005em;
+}
+
+.entry-content .beer-list__leader {
+  border-bottom: 1px dotted rgba(206,203,246,0.34);
+  transform: translateY(-5px);
+}
+
+.entry-content .beer-list__abv {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold-light);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.entry-content .beer-list__style {
+  font-size: 13px;
+  color: var(--p200);
+  letter-spacing: 0.4px;
+  margin-top: 5px;
+}
+
+.entry-content .beer-list__empty {
+  font-size: 15px;
+  color: var(--p200);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ---- Coming Soon ---------------------------------------------------------- */
+.entry-content .beer-list__coming-soon {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(197,155,58,0.3);
+}
+
+.entry-content .beer-list__coming-soon-label {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.entry-content .beer-list__coming-soon-items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 32px;
+}
+
+.entry-content .beer-list__coming-soon-item {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.entry-content .beer-list__coming-soon-item .beer-list__name {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(238,237,254,0.62);
+}
+
+.entry-content .beer-list__coming-soon-item .beer-list__style {
+  font-size: 12px;
+  font-style: italic;
+  color: rgba(175,169,236,0.62);
+  margin-top: 0;
+}
+
+/* ---- Plain variant -------------------------------------------------------- */
+.entry-content .beer-list--plain .beer-list__inner { padding: 0; }
+.entry-content .beer-list--plain .beer-list__heading { color: var(--p900); font-size: 32px; }
+.entry-content .beer-list--plain .beer-list__eyebrow { color: var(--p400); }
+.entry-content .beer-list--plain .beer-list__note { color: var(--p400); }
+.entry-content .beer-list--plain .beer-list__item { border-bottom-color: var(--p100); }
+.entry-content .beer-list--plain .beer-list__name { color: var(--p900); }
+.entry-content .beer-list--plain .beer-list__leader { border-bottom-color: var(--p200); }
+.entry-content .beer-list--plain .beer-list__abv { color: var(--gold); }
+.entry-content .beer-list--plain .beer-list__style { color: var(--p600); }
+.entry-content .beer-list--plain .beer-list__empty { color: var(--p400); }
+.entry-content .beer-list--plain .beer-list__coming-soon-item .beer-list__name { color: var(--p600); }
+.entry-content .beer-list--plain .beer-list__coming-soon-item .beer-list__style { color: var(--p400); }
+
+/* ---- Responsive ----------------------------------------------------------- */
+@media (max-width: 900px) {
+  .entry-content .beer-list__items { columns: 1; }
+}
+
+@media (max-width: 760px) {
+  .entry-content .beer-list--band .beer-list__inner,
+  .entry-content .beer-list--band:not(.alignfull):not(.alignwide) .beer-list__inner {
+    padding: 48px 22px;
+  }
+
+  /* The stained glass has no readable focal point at phone width; the scrim
+     goes near-solid so it reads as texture rather than a failed photograph. */
+  .entry-content .beer-list--band .beer-list__scrim {
+    background: linear-gradient(180deg, rgba(29,26,71,0.95) 0%, rgba(29,26,71,0.88) 100%);
+  }
+
+  .entry-content .beer-list__head { margin-bottom: 32px; }
+  .entry-content .beer-list__heading { font-size: 30px; }
+  .entry-content .beer-list--plain .beer-list__heading { font-size: 26px; }
+  .entry-content .beer-list__name { font-size: 18px; }
+  .entry-content .beer-list__item { padding-bottom: 18px; margin-bottom: 18px; }
+  .entry-content .beer-list__coming-soon-items { gap: 10px 20px; }
 }
