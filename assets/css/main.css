@@ -1192,14 +1192,24 @@ nav.site-nav {
   padding: 72px 48px;
 }
 
-/* A full-bleed block sitting last has nothing to breathe against — the 72px
-   bottom padding just reads as a white gap above the footer. Drop it when the
-   final child bleeds. Prose pages keep their padding, so this needs no
-   per-page intervention. Add `elks-flush-bottom` by hand for the cases this
-   doesn't catch (e.g. a last block that bleeds via some other mechanism).
+/* A full-bleed block sitting first or last has nothing to breathe against —
+   the 72px of container padding just reads as a white gap against the banner
+   above or the footer below. Drop it on whichever end bleeds. Prose pages keep
+   their padding, so this needs no per-page intervention. Add
+   `elks-flush-top` / `elks-flush-bottom` by hand for the cases this doesn't
+   catch (e.g. a block that bleeds via some other mechanism).
 
    The feature-split/cta-band selectors are here because those two are
    full-bleed by their own component rules below, not by an alignfull class. */
+.page-entry-content:has(> :first-child.alignfull),
+.page-entry-content:has(> :first-child.alignwide),
+.page-entry-content:has(> :first-child.elks-flush-top),
+.page-entry-content:has(> :first-child.elks-flush),
+.page-entry-content:has(> .feature-split:first-child),
+.page-entry-content:has(> .cta-band:first-child) {
+  padding-top: 0;
+}
+
 .page-entry-content:has(> :last-child.alignfull),
 .page-entry-content:has(> :last-child.alignwide),
 .page-entry-content:has(> :last-child.elks-flush-bottom),
@@ -1209,8 +1219,13 @@ nav.site-nav {
   padding-bottom: 0;
 }
 
-/* Zeroing the container's padding isn't enough on its own — the last block
-   still carries its own bottom margin (figure.alignfull sets 3em). */
+/* Zeroing the container's padding isn't enough on its own — the block still
+   carries its own margin (figure.alignfull sets 3em on both ends). */
+.page-entry-content > .alignfull:first-child,
+.page-entry-content > .alignwide:first-child {
+  margin-top: 0;
+}
+
 .page-entry-content > .alignfull:last-child,
 .page-entry-content > .alignwide:last-child {
   margin-bottom: 0;
