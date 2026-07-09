@@ -1741,6 +1741,20 @@ nav.site-nav {
   padding: 0;
 }
 
+/* Flush utilities — collapse the vertical gap between stacked full-bleed
+   blocks (map into photo, photo into a colored band, etc). Applied per block
+   from the editor's Advanced → Additional CSS class field, since this theme
+   ships no theme.json and therefore exposes no core spacing controls.
+
+   !important because .entry-content figure's `margin: 2em auto` shorthand and
+   the figure.alignfull rule above both set these longhands, and a single
+   utility class can't out-specify either without it. */
+.entry-content .elks-flush-bottom,
+.entry-content .elks-flush { margin-bottom: 0 !important; }
+
+.entry-content .elks-flush-top,
+.entry-content .elks-flush { margin-top: 0 !important; }
+
 @media (max-width: 760px) {
   .entry-content .elks-map {
     aspect-ratio: 4 / 3;
