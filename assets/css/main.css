@@ -1514,28 +1514,63 @@ nav.site-nav {
 
 /* --------------------------------------------------------------------------
    18. Hours Display Block (denver17/hours-display)
-   This block never had its own styles — it renders live hours on inner
-   pages using its own BEM class names, separate from the homepage's
-   hardcoded .hours-card markup, which is why it showed up as plain
-   unstyled text on When & Where. Reuses the same visual language as
-   .hours-card above. Every selector is scoped under .entry-content since
-   that's the only place this block appears, so it can't lose a specificity
-   fight against the generic h2/p rules the way .feature-h and .feature-body
-   did.
+   Renders live hours on inner pages using its own BEM class names, separate
+   from the homepage's hardcoded .hours-card markup. Every selector is scoped
+   under .entry-content since that's the only place this block appears, so it
+   can't lose a specificity fight against the generic h2/p rules the way
+   .feature-h and .feature-body did.
+
+   The homepage card is a 270px pill floating over the hero. On an inner page
+   it has a full prose column (or a full-bleed row) to work with, so it fills
+   its container and splits into two columns: today's status on the left,
+   regular hours and caveats on the right. Below 640px it collapses back to
+   the stacked homepage arrangement.
    -------------------------------------------------------------------------- */
 .entry-content .hours-display {
   background: var(--p50);
   border-radius: 16px;
-  padding: 22px 26px;
-  max-width: 320px;
+  padding: 32px 36px;
+  width: 100%;
   border: 0.5px solid var(--p100);
+}
+
+/* Full-bleed variant: the rounded card reads as a band, not a floating chip */
+.page-entry-content > .hours-display.alignfull {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  padding: 48px;
+}
+
+.entry-content .hours-display__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 44px;
+  align-items: start;
+}
+
+.entry-content .hours-display__grid--single {
+  grid-template-columns: 1fr;
+}
+
+/* Vertical rule between the two columns, drawn on the right column so it
+   disappears automatically when the grid collapses (rule is re-declared as a
+   top border in the 640px block below). */
+.entry-content .hours-display__secondary {
+  border-left: 1px solid var(--p100);
+  padding-left: 44px;
+}
+
+.entry-content .hours-display__grid--single .hours-display__secondary {
+  border-left: none;
+  padding-left: 0;
 }
 
 .entry-content .hours-display__heading {
   font-size: 19px;
   font-weight: 700;
   color: var(--p900);
-  margin: 0 0 14px;
+  margin: 0 0 20px;
 }
 
 .entry-content .hours-display__status-row {
@@ -1581,42 +1616,139 @@ nav.site-nav {
 .entry-content .hours-display--closed .hours-display__status-text   { color: #B03030; }
 
 .entry-content .hours-display__date {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--p400);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 
 .entry-content .hours-display__range {
-  font-size: 19px;
+  font-size: 30px;
   font-weight: 700;
   color: var(--p900);
-  line-height: 1.3;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .entry-content .hours-display__special {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--gold);
-  margin-top: 10px;
+  margin-top: 14px;
   line-height: 1.4;
 }
 
 .entry-content .hours-display__base-hours {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--p100);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--p600);
+}
+
+.entry-content .hours-display__base-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--p400);
+  margin-bottom: 8px;
 }
 
 .entry-content .hours-display__base-line + .hours-display__base-line { margin-top: 4px; }
 
 .entry-content .hours-display__note {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--p400);
-  margin: 7px 0 0;
-  line-height: 1.5;
+  margin: 0;
+  line-height: 1.55;
+}
+
+.entry-content .hours-display__base-hours + .hours-display__note { margin-top: 18px; }
+.entry-content .hours-display__note + .hours-display__note { margin-top: 4px; }
+
+@media (max-width: 640px) {
+  .entry-content .hours-display { padding: 24px 22px; }
+
+  .page-entry-content > .hours-display.alignfull { padding: 32px 22px; }
+
+  .entry-content .hours-display__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .entry-content .hours-display__secondary {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--p100);
+    padding-top: 20px;
+  }
+
+  .entry-content .hours-display__range { font-size: 22px; }
+}
+
+
+/* --------------------------------------------------------------------------
+   18b. Full-bleed media on inner pages (maps, exterior photos)
+
+   Two problems the generic rules above cause for edge-to-edge media:
+
+   1. `.entry-content img { border-radius: 8px }` rounds every image, which
+      looks wrong on a photo that's meant to touch both viewport edges.
+   2. An embedded map is usually a raw <iframe> carrying hardcoded width and
+      height attributes. Alignment classes move its box; they don't resize the
+      iframe, so it either overflows or leaves a gap. .elks-map forces the
+      iframe to fill a fixed-ratio container instead.
+
+   Usage: wrap the map embed in a core Group block, set the Group to Full
+   width, and add `elks-map` under Advanced → Additional CSS class.
+   -------------------------------------------------------------------------- */
+.page-entry-content > figure.alignfull,
+.page-entry-content > figure.alignwide {
+  margin-top: 3em;
+  margin-bottom: 3em;
+}
+
+.page-entry-content > figure.alignfull img {
+  border-radius: 0;
+  width: 100%;
+  max-height: 620px;
+  object-fit: cover;
+}
+
+.page-entry-content > figure.alignfull figcaption {
+  padding: 0 48px;
+}
+
+.entry-content .elks-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  overflow: hidden;
+  background: var(--p50);
+  margin: 3em 0;
+}
+
+.entry-content .elks-map iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* Group blocks pick up padding from the block editor's layout styles; the map
+   is the whole point of the container, so strip it back to zero. */
+.entry-content .elks-map.wp-block-group {
+  padding: 0;
+}
+
+@media (max-width: 760px) {
+  .entry-content .elks-map {
+    aspect-ratio: 4 / 3;
+    margin: 2em 0;
+  }
+
+  .page-entry-content > figure.alignfull img { max-height: 320px; }
+  .page-entry-content > figure.alignfull figcaption { padding: 0 22px; }
 }
 
 

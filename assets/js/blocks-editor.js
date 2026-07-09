@@ -381,7 +381,18 @@
     title: 'Hours Display',
     category: 'denver17',
     description: 'Live hours pulled from Google Sheets. All sections can be toggled.',
+    // Must mirror block.json's supports — this block registers client-side by
+    // hand (no build step, no editorScript in block.json), so the server's
+    // metadata never reaches the editor. Without `align` here the toolbar
+    // width control never appears, even though the PHP side honors it.
+    supports: {
+      html: false,
+      className: false,
+      anchor: true,
+      align: [ 'wide', 'full' ],
+    },
     attributes: {
+      align:         { type: 'string' },
       heading:       { type: 'string',  default: '' },
       showStatus:    { type: 'boolean', default: true },
       showSpecial:   { type: 'boolean', default: true },

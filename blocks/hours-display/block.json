@@ -5,8 +5,14 @@
   "title": "Hours Display",
   "category": "denver17",
   "description": "Live hours status pulled from the Google Sheets schedule. Intended for the When & Where page.",
-  "supports": { "html": false, "className": false, "anchor": true },
+  "supports": {
+    "html": false,
+    "className": false,
+    "anchor": true,
+    "align": [ "wide", "full" ]
+  },
   "attributes": {
+    "align":         { "type": "string" },
     "heading":       { "type": "string",  "default": "" },
     "showStatus":    { "type": "boolean", "default": true },
     "showSpecial":   { "type": "boolean", "default": true },

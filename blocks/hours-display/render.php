@@ -6,6 +6,15 @@
  * and computes open/closed status server-side. No JS required on inner pages
  * since page caching is disabled for authenticated/dynamic pages.
  *
+ * Markup is split into two columns (__primary / __secondary) so the card can
+ * fill an 800px prose column or a full-bleed row without turning into a tall
+ * ribbon of left-aligned text. Below 640px the grid collapses back to the
+ * single stacked column the homepage .hours-card uses.
+ *
+ * Wrapper attributes come from get_block_wrapper_attributes() so the block's
+ * `align` support (wide/full) actually lands an alignwide/alignfull class on
+ * the outer div — the theme's .page-entry-content rules key off that class.
+ *
  * Status modifier classes on the wrapper:
  *   .hours-display--open       currently open
  *   .hours-display--opens-at   open today but not yet
@@ -73,46 +82,69 @@ function denver17_render_block_hours_display( $attributes ) {
     $show_note       = (bool) ( $attributes['showNote']      ?? true );
     $heading         = trim( $attributes['heading'] ?? '' );
 
+    $has_base = $show_base_hours && ( $display_1 || $display_2 );
+    $has_side = $has_base || $show_note;
+
+    // get_block_wrapper_attributes() picks up align + anchor from block supports.
+    $wrapper = get_block_wrapper_attributes( array(
+        'class' => 'hours-display hours-display--' . $status,
+    ) );
+
     ob_start();
     ?>
-    <div class="hours-display hours-display--<?php echo esc_attr( $status ); ?>">
+    <div <?php echo $wrapper; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 
         <?php if ( $heading ) : ?>
             <h2 class="hours-display__heading"><?php echo esc_html( $heading ); ?></h2>
         <?php endif; ?>
 
-        <?php if ( $show_status ) : ?>
-            <div class="hours-display__status-row">
-                <span class="hours-display__dot" aria-hidden="true"></span>
-                <span class="hours-display__status-text"><?php echo $status_text; ?></span>
-            </div>
-        <?php endif; ?>
+        <div class="hours-display__grid<?php echo $has_side ? '' : ' hours-display__grid--single'; ?>">
 
-        <div class="hours-display__date"><?php echo esc_html( $date_label ); ?></div>
+            <div class="hours-display__primary">
 
-        <?php if ( $range ) : ?>
-            <div class="hours-display__range"><?php echo $range; ?></div>
-        <?php endif; ?>
-
-        <?php if ( $show_special && $special ) : ?>
-            <div class="hours-display__special"><?php echo esc_html( $special ); ?></div>
-        <?php endif; ?>
-
-        <?php if ( $show_base_hours && ( $display_1 || $display_2 ) ) : ?>
-            <div class="hours-display__base-hours">
-                <?php if ( $display_1 ) : ?>
-                    <div class="hours-display__base-line"><?php echo esc_html( $display_1 ); ?></div>
+                <?php if ( $show_status ) : ?>
+                    <div class="hours-display__status-row">
+                        <span class="hours-display__dot" aria-hidden="true"></span>
+                        <span class="hours-display__status-text"><?php echo $status_text; ?></span>
+                    </div>
                 <?php endif; ?>
-                <?php if ( $display_2 ) : ?>
-                    <div class="hours-display__base-line"><?php echo esc_html( $display_2 ); ?></div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
 
-        <?php if ( $show_note ) : ?>
-            <p class="hours-display__note">Hours subject to change for special events.</p>
-            <p class="hours-display__note">Closing time is at bartender&rsquo;s discretion.</p>
-        <?php endif; ?>
+                <div class="hours-display__date"><?php echo esc_html( $date_label ); ?></div>
+
+                <?php if ( $range ) : ?>
+                    <div class="hours-display__range"><?php echo $range; ?></div>
+                <?php endif; ?>
+
+                <?php if ( $show_special && $special ) : ?>
+                    <div class="hours-display__special"><?php echo esc_html( $special ); ?></div>
+                <?php endif; ?>
+
+            </div>
+
+            <?php if ( $has_side ) : ?>
+                <div class="hours-display__secondary">
+
+                    <?php if ( $has_base ) : ?>
+                        <div class="hours-display__base-hours">
+                            <div class="hours-display__base-label">Regular hours</div>
+                            <?php if ( $display_1 ) : ?>
+                                <div class="hours-display__base-line"><?php echo esc_html( $display_1 ); ?></div>
+                            <?php endif; ?>
+                            <?php if ( $display_2 ) : ?>
+                                <div class="hours-display__base-line"><?php echo esc_html( $display_2 ); ?></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ( $show_note ) : ?>
+                        <p class="hours-display__note">Hours subject to change for special events.</p>
+                        <p class="hours-display__note">Closing time is at bartender&rsquo;s discretion.</p>
+                    <?php endif; ?>
+
+                </div>
+            <?php endif; ?>
+
+        </div>
 
     </div>
     <?php
