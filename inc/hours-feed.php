@@ -226,3 +226,216 @@ function denver17_get_hours_data() {
     set_transient( 'denver17_hours_data', $data, DENVER17_HOURS_CACHE_TTL );
     return $data;
 }
+
+
+// ── Per-date hours API (consumed by the events calendar day cells) ────────────
+//
+// denver17_get_hours_data() above only resolves TODAY (for the hours card). The
+// calendar needs the effective hours for ANY date: the base weekly schedule by
+// day-of-week, unless the Schedule tab has an override row for that exact date.
+// The parsed sheet tabs are cached once so a month view (~35 dates) costs a
+// single transient read, not 35 external fetches.
+
+/**
+ * Fetch + parse both sheet tabs once, cached. Returns:
+ * [
+ *   'base'     => [ key => value ]                       (Base Hours tab)
+ *   'schedule' => [ 'Y-m-d' => ['open','close','special'] ]  (Schedule overrides)
+ * ]
+ *
+ * @return array{base:array,schedule:array}
+ */
+function denver17_hours_tables() {
+    $cached = get_transient( 'denver17_hours_tables' );
+    if ( false !== $cached ) {
+        return $cached;
+    }
+
+    $base      = [];
+    $base_rows = denver17_fetch_sheet_tab( 'Base Hours' );
+    if ( $base_rows ) {
+        foreach ( $base_rows as $row ) {
+            $key = strtolower( trim( $row[0] ?? '' ) );
+            $val = trim( $row[1] ?? '' );
+            if ( '' !== $key ) {
+                $base[ $key ] = $val;
+            }
+        }
+    }
+
+    $schedule = [];
+    $wp_tz    = wp_timezone();
+    $rows     = denver17_fetch_sheet_tab( 'Schedule' );
+    if ( $rows ) {
+        foreach ( $rows as $row ) {
+            $date_raw = trim( $row[0] ?? '' );
+            if ( '' === $date_raw ) {
+                continue;
+            }
+            // Same date-cleaning as denver17_get_hours_data(): strip a weekday
+            // prefix, strip the trailing non-breaking space Google Sheets emits,
+            // append the current year if missing.
+            $clean = preg_replace( '/^[A-Za-z]+,\s*/u', '', $date_raw );
+            $clean = preg_replace( '/\s+$/u', '', $clean );
+            if ( ! preg_match( '/\d{4}/', $clean ) ) {
+                $clean .= ', ' . ( new DateTime( 'now', $wp_tz ) )->format( 'Y' );
+            }
+            $dt = DateTime::createFromFormat( 'F j, Y', $clean, $wp_tz );
+            if ( ! $dt ) {
+                $dt = date_create( $clean, $wp_tz );
+            }
+            if ( $dt ) {
+                $schedule[ $dt->format( 'Y-m-d' ) ] = [
+                    'open'    => denver17_normalise_time( $row[1] ?? '' ),
+                    'close'   => denver17_normalise_time( $row[2] ?? '' ),
+                    'special' => trim( $row[3] ?? '' ),
+                ];
+            }
+        }
+    }
+
+    $tables = [ 'base' => $base, 'schedule' => $schedule ];
+    set_transient( 'denver17_hours_tables', $tables, DENVER17_HOURS_CACHE_TTL );
+    return $tables;
+}
+
+/** Format a "HH:MM" (24h) value as "g:i A", or '' if empty. */
+function denver17_normalise_display_time( $hm ) {
+    $hm = trim( (string) $hm );
+    if ( '' === $hm ) {
+        return '';
+    }
+    $dt = DateTime::createFromFormat( 'H:i', $hm, wp_timezone() );
+    return $dt ? $dt->format( 'g:i A' ) : $hm;
+}
+
+/**
+ * Effective hours for a single local date.
+ *
+ * @param string     $ymd    'Y-m-d' local date.
+ * @param array|null $tables Pre-fetched tables (avoids re-reading the transient
+ *                           in a loop). Null = fetch here.
+ * @return array{date:string,label:string,closed:bool,open_time:string,close_time:string,special:string}
+ */
+function denver17_compute_hours_for_date( $ymd, $tables = null ) {
+    if ( null === $tables ) {
+        $tables = denver17_hours_tables();
+    }
+    $base     = $tables['base'];
+    $schedule = $tables['schedule'];
+    $wp_tz    = wp_timezone();
+
+    $dt = DateTime::createFromFormat( 'Y-m-d', $ymd, $wp_tz );
+    if ( ! $dt ) {
+        return [ 'date' => $ymd, 'label' => '', 'closed' => true, 'open_time' => '', 'close_time' => '', 'special' => '' ];
+    }
+    $dt->setTime( 0, 0, 0 );
+    $dow = (int) $dt->format( 'w' );
+
+    $day_map = [ 'sun' => 0, 'mon' => 1, 'tue' => 2, 'wed' => 3, 'thu' => 4, 'fri' => 5, 'sat' => 6 ];
+    $open_days_raw = $base['open_days'] ?? 'Tue,Wed,Thu,Fri,Sat';
+    $open_days = array_values( array_filter(
+        array_map(
+            function ( $d ) use ( $day_map ) {
+                $abbr = strtolower( trim( substr( trim( $d ), 0, 3 ) ) );
+                return $day_map[ $abbr ] ?? null;
+            },
+            explode( ',', $open_days_raw )
+        ),
+        fn( $v ) => null !== $v
+    ) );
+    $base_open = denver17_normalise_time( $base['open_time'] ?? '17:30' );
+
+    if ( isset( $schedule[ $ymd ] ) ) {
+        // Live-spreadsheet override wins.
+        $open    = $schedule[ $ymd ]['open'];
+        $close   = $schedule[ $ymd ]['close'];
+        $special = $schedule[ $ymd ]['special'];
+    } elseif ( in_array( $dow, $open_days, true ) ) {
+        // Default weekly schedule.
+        $open    = $base_open;
+        $close   = '';
+        $special = '';
+    } else {
+        $open    = '';
+        $close   = '';
+        $special = '';
+    }
+
+    $closed = ( '' === $open );
+    if ( $closed ) {
+        $label = 'Closed';
+    } else {
+        $label = denver17_normalise_display_time( $open ) . '–' . ( '' !== $close ? denver17_normalise_display_time( $close ) : 'Close' );
+    }
+
+    return [
+        'date'       => $ymd,
+        'label'      => $label,
+        'closed'     => $closed,
+        'open_time'  => $open,
+        'close_time' => $close,
+        'special'    => $special,
+    ];
+}
+
+/**
+ * REST: GET /wp-json/denver17/v1/hours
+ *   ?date=YYYY-MM-DD                 single date
+ *   ?start=YYYY-MM-DD&end=YYYY-MM-DD inclusive range (what the calendar uses)
+ * Always returns a map keyed by 'Y-m-d' so the client handles one shape.
+ */
+add_action( 'rest_api_init', function () {
+    register_rest_route(
+        'denver17/v1',
+        '/hours',
+        [
+            'methods'             => 'GET',
+            'permission_callback' => '__return_true',
+            'callback'            => 'denver17_rest_hours',
+            'args'                => [
+                'date'  => [ 'required' => false, 'type' => 'string' ],
+                'start' => [ 'required' => false, 'type' => 'string' ],
+                'end'   => [ 'required' => false, 'type' => 'string' ],
+            ],
+        ]
+    );
+} );
+
+function denver17_rest_hours( $request ) {
+    $tables = denver17_hours_tables();
+    $wp_tz  = wp_timezone();
+    $out    = [];
+
+    $is_ymd = function ( $s ) {
+        return (bool) preg_match( '/^\d{4}-\d{2}-\d{2}$/', (string) $s );
+    };
+
+    $date  = (string) $request->get_param( 'date' );
+    $start = (string) $request->get_param( 'start' );
+    $end   = (string) $request->get_param( 'end' );
+
+    if ( $is_ymd( $date ) ) {
+        $out[ $date ] = denver17_compute_hours_for_date( $date, $tables );
+    } elseif ( $is_ymd( $start ) && $is_ymd( $end ) ) {
+        $s = DateTime::createFromFormat( 'Y-m-d', $start, $wp_tz );
+        $e = DateTime::createFromFormat( 'Y-m-d', $end, $wp_tz );
+        if ( $s && $e ) {
+            $s->setTime( 0, 0, 0 );
+            $e->setTime( 0, 0, 0 );
+            $cursor = clone $s;
+            $guard  = 0;
+            while ( $cursor <= $e && $guard < 400 ) {
+                $d = $cursor->format( 'Y-m-d' );
+                $out[ $d ] = denver17_compute_hours_for_date( $d, $tables );
+                $cursor->modify( '+1 day' );
+                $guard++;
+            }
+        }
+    } else {
+        $d = ( new DateTime( 'today', $wp_tz ) )->format( 'Y-m-d' );
+        $out[ $d ] = denver17_compute_hours_for_date( $d, $tables );
+    }
+
+    return rest_ensure_response( $out );
+}
