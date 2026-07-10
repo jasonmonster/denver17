@@ -199,11 +199,73 @@
   }
 
   // ---------------------------------------------------------------------------
+  // Upcoming Events Carousel
+  //
+  // The homepage events row (template-parts/events/upcoming-list.php) lays the
+  // cards out in a horizontal scroll-snap track. This only powers the prev/next
+  // arrow buttons and shows/hides them based on scroll position — the track is
+  // fully usable by swipe/trackpad without JS. Arrows stay hidden when every
+  // card already fits, so a short list looks like a plain row, not a carousel.
+  // ---------------------------------------------------------------------------
+
+  function initEventCarousels() {
+    var carousels = document.querySelectorAll( '[data-eb-carousel]' );
+
+    carousels.forEach( function ( carousel ) {
+      var track = carousel.querySelector( '[data-eb-track]' );
+      var prev  = carousel.querySelector( '[data-eb-prev]' );
+      var next  = carousel.querySelector( '[data-eb-next]' );
+
+      if ( ! track ) return;
+
+      // Scroll by one card + gap, falling back to ~80% of the visible width.
+      function step() {
+        var card = track.querySelector( '.ev-card' );
+        if ( card ) {
+          var gap = parseFloat( getComputedStyle( track ).columnGap ) || 22;
+          return card.getBoundingClientRect().width + gap;
+        }
+        return track.clientWidth * 0.8;
+      }
+
+      function update() {
+        // 1px fudge absorbs sub-pixel rounding at the far end.
+        var maxScroll    = track.scrollWidth - track.clientWidth - 1;
+        var overflowing  = maxScroll > 0;
+        if ( prev ) prev.hidden = ! overflowing || track.scrollLeft <= 0;
+        if ( next ) next.hidden = ! overflowing || track.scrollLeft >= maxScroll;
+      }
+
+      if ( prev ) {
+        prev.addEventListener( 'click', function () {
+          track.scrollBy( { left: -step(), behavior: 'smooth' } );
+        } );
+      }
+      if ( next ) {
+        next.addEventListener( 'click', function () {
+          track.scrollBy( { left: step(), behavior: 'smooth' } );
+        } );
+      }
+
+      track.addEventListener( 'scroll', update, { passive: true } );
+      window.addEventListener( 'resize', update );
+
+      // Late-loading feature images can change scrollWidth after first paint.
+      track.querySelectorAll( 'img' ).forEach( function ( img ) {
+        if ( ! img.complete ) img.addEventListener( 'load', update );
+      } );
+
+      update();
+    } );
+  }
+
+  // ---------------------------------------------------------------------------
   // Init
   // ---------------------------------------------------------------------------
 
   initHoursCard();
   initMobileMenu();
   initMobileAccordions();
+  initEventCarousels();
 
 } )();

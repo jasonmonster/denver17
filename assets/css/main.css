@@ -715,6 +715,173 @@ nav.site-nav {
 
 
 /* --------------------------------------------------------------------------
+   8b. Upcoming Events — live card row / carousel
+   (denver17-events upcoming-list block -> template-parts/events/upcoming-list.php)
+   Light WOW-style cards on the purple band. Replaces the static mosaic above:
+   a horizontal scroll-snap row that shows arrow buttons only when it overflows.
+   -------------------------------------------------------------------------- */
+.elks17-upcoming .eb-carousel {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.eb-track {
+  list-style: none;
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 6px 4px 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--p600) transparent;
+}
+.eb-track::-webkit-scrollbar { height: 8px; }
+.eb-track::-webkit-scrollbar-thumb { background: var(--p600); border-radius: 999px; }
+.eb-track::-webkit-scrollbar-track { background: transparent; }
+
+.ev-card {
+  flex: 0 0 clamp(250px, 80vw, 300px);
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(13, 10, 40, 0.30);
+}
+
+.ev-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--p800);
+}
+.ev-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ev-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ev-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  color: #2a2140;
+  background: var(--gold-light);
+  box-shadow: 0 2px 6px rgba(13, 10, 40, 0.25);
+}
+.ev-badge--ticketed {
+  color: #fff;
+  background: var(--p600);
+}
+
+.ev-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 20px;
+}
+
+.ev-date {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--p600);
+}
+
+.ev-title {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--p900);
+}
+.ev-title a { color: inherit; }
+.ev-title a:hover { color: var(--p600); }
+
+.ev-loc {
+  font-size: 13px;
+  color: var(--p600);
+}
+
+.ev-desc {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #5b5573;
+}
+
+.ev-btn {
+  margin-top: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--p600);
+  padding: 11px 20px;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+.ev-btn:hover { background: var(--p800); }
+.ev-btn-arrow { transition: transform 0.15s ease; }
+.ev-btn:hover .ev-btn-arrow { transform: translateX(3px); }
+
+.eb-nav {
+  position: absolute;
+  top: 40%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--p800);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(13, 10, 40, 0.40);
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.eb-nav:hover { background: var(--p50); }
+.eb-nav:active { transform: translateY(-50%) scale(0.94); }
+.eb-nav[hidden] { display: none; }
+.eb-nav--prev { left: -14px; }
+.eb-nav--next { right: -14px; }
+
+.eb-empty {
+  text-align: center;
+  color: var(--p200);
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  .eb-nav--prev { left: 2px; }
+  .eb-nav--next { right: 2px; }
+}
+
+
+/* --------------------------------------------------------------------------
    9. CTA Band
    -------------------------------------------------------------------------- */
 .cta-band {
