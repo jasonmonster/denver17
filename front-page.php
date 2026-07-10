@@ -10,7 +10,8 @@
  *   2. Feature Split — bar (denver17/feature-split, variant: dark, layout: image-left)
  *   3. Feature Split — community (denver17/feature-split, variant: mid, layout: text-left)
  *   4. Membership Steps (denver17/membership-steps)
- *   5. Events Band (denver17/events-band)
+ *   5. Upcoming Events (denver17-events/upcoming-list) — live event card row/carousel
+ *      (replaced the old static denver17/events-band mosaic)
  *   6. CTA Band (denver17/cta-band)
  *
  * All Denver17 blocks appear under the "Denver Elks #17" category in the inserter.
