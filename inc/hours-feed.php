@@ -299,14 +299,14 @@ function denver17_hours_tables() {
     return $tables;
 }
 
-/** Format a "HH:MM" (24h) value as "g:i A", or '' if empty. */
-function denver17_normalise_display_time( $hm ) {
+/** Format a "HH:MM" (24h) value with a PHP time format (default "g:i"), or '' if empty. */
+function denver17_normalise_display_time( $hm, $format = 'g:i' ) {
     $hm = trim( (string) $hm );
     if ( '' === $hm ) {
         return '';
     }
     $dt = DateTime::createFromFormat( 'H:i', $hm, wp_timezone() );
-    return $dt ? $dt->format( 'g:i A' ) : $hm;
+    return $dt ? $dt->format( $format ) : $hm;
 }
 
 /**
@@ -366,7 +366,8 @@ function denver17_compute_hours_for_date( $ymd, $tables = null ) {
     if ( $closed ) {
         $label = 'Closed';
     } else {
-        $label = denver17_normalise_display_time( $open ) . '–' . ( '' !== $close ? denver17_normalise_display_time( $close ) : 'Close' );
+        $close_disp = ( '' !== $close ) ? denver17_normalise_display_time( $close ) : 'Close';
+        $label = 'Club Open ' . denver17_normalise_display_time( $open ) . ' - ' . $close_disp;
     }
 
     return [
