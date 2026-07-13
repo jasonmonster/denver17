@@ -1191,6 +1191,15 @@ nav.site-nav {
     flex-shrink: 0;
   }
 
+  /* The person glyph's artwork sits high in its 24×24 viewBox, so flex-centering
+     the SVG box leaves it looking top-heavy. Enlarge slightly and nudge down to
+     optically center it in the circle. */
+  .nav-cta svg {
+    width: 20px;
+    height: 20px;
+    transform: translateY(1px);
+  }
+
   .nav-hamburger { display: flex; }
 
   /* Push the CTA+hamburger cluster hard to the right edge (space-between alone
