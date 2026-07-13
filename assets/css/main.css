@@ -1171,40 +1171,13 @@ nav.site-nav {
   .nav-logo .custom-logo-link img { width: 84px; height: 84px; }
 
   .nav-links,
-  .nav-social { display: none; }
-
-  /* Member Area collapses to a circular icon button on mobile — the drawer
-     carries the full-text CTA, so the top bar only needs the icon. font-size:0
-     hides the bare "Member Area" text node without touching the SVG (which is
-     sized by its width/height attributes, not font-size). align-items:center
-     overrides the inline-flex baseline so the icon sits dead-center. */
-  .nav-cta {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    gap: 0;
-    border-radius: 50%;
-    align-items: center;
-    justify-content: center;
-    font-size: 0;
-    line-height: 0;
-    flex-shrink: 0;
-  }
-
-  /* The person glyph's artwork sits high in its 24×24 viewBox, so flex-centering
-     the SVG box leaves it looking top-heavy. Enlarge slightly and nudge down to
-     optically center it in the circle. */
-  .nav-cta svg {
-    width: 20px;
-    height: 20px;
-    transform: translateY(1px);
-  }
+  .nav-social,
+  .nav-cta { display: none; }
 
   .nav-hamburger { display: flex; }
 
-  /* Push the CTA+hamburger cluster hard to the right edge (space-between alone
-     parks the lone visible flex item mid-bar because of the 88px left padding);
-     tighter gap between the two controls. */
+  /* Push the hamburger to the right edge (space-between alone parks the lone
+     visible flex item mid-bar because of the 88px left padding). */
   .nav-right {
     margin-left: auto;
     gap: 12px;
