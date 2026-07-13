@@ -1290,7 +1290,7 @@ nav.site-nav {
    The homepage overrides this below with transparent + position absolute. */
 .site-header {
   background: var(--p900);
-  padding-top: 20px;
+  padding-top: 28px;
   padding-bottom: 20px;
 }
 
