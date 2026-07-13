@@ -1241,7 +1241,8 @@ nav.site-nav {
 
   /* Site header — tighter top padding on mobile inner pages */
   .site-header { padding-top: 14px; padding-bottom: 14px; }
-  .home .site-header { padding-top: 0; padding-bottom: 0; }
+  /* 16px matches the mobile .nav-wrap top margin, same collapse fix as desktop */
+  .home .site-header { padding-top: 16px; padding-bottom: 0; }
 
   /* Inner page banner */
   .page-banner { padding: 40px 22px 44px; }
@@ -1293,9 +1294,14 @@ nav.site-nav {
   padding-bottom: 20px;
 }
 
+/* padding-top matches .nav-wrap's 28px top margin. Without it, that margin
+   collapses through the absolutely-positioned header (no top border/padding to
+   contain it) and the nav pill sits flush against the viewport. The padding
+   stops the collapse so the homepage gets the same breathing room above the
+   logo as inner pages. Header is out of flow, so this doesn't shift the hero. */
 .home .site-header {
   background: transparent;
-  padding-top: 0;
+  padding-top: 28px;
   padding-bottom: 0;
 }
 

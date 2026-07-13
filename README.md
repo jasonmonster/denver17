@@ -233,6 +233,13 @@ Status values: `On Tap`, `Coming Soon`, `Not In Stock`. Only the first two are d
 - [ ] Replace `events-band.php` static placeholder with live plugin output
 - [ ] CPTs: events, ticket types, orders
 
+### Backlog — Not Yet Scheduled
+
+Decided-to-do, no session assigned yet. Added 2026-07-10.
+
+- [ ] **Broncos games page** — game-day / watch-party page: season schedule, which games the lodge shows, food/drink specials. Content page, so theme-side. Open questions: static page vs. live schedule feed (published Google Sheet, same pattern as hours/beer); whether watch parties should *also* be `elks_event` posts so they hit the calendar; has to stay non-dev editable each season.
+- [ ] **Photo gallery** — lodge photo gallery, editable from the WP editor by non-devs. Open questions: flat gallery vs. albums/categories (albums → CPT or taxonomy); lightbox behavior; where photos come from and rough count at launch; core Gallery block styled to the palette vs. a custom Gutenberg block (default to the lightest option that clears the editability bar).
+
 ---
 
 ## Key Decisions & Context
