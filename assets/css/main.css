@@ -1030,6 +1030,15 @@ nav.site-nav {
   object-fit: contain;
 }
 
+/* the_custom_logo() outputs .custom-logo inside an .custom-logo-link anchor
+   rather than .mobile-menu-logo, so size it to match the hardcoded fallback. */
+.mobile-menu-head .custom-logo-link { display: block; line-height: 0; }
+.mobile-menu-head .custom-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
 .mobile-menu-close {
   background: none;
   border: none;
@@ -1164,7 +1173,25 @@ nav.site-nav {
   .nav-links,
   .nav-social { display: none; }
 
+  /* Member Area collapses to a circular icon button on mobile — the drawer
+     carries the full-text CTA, so the top bar only needs the icon. font-size:0
+     hides the bare "Member Area" text node without touching the SVG (which is
+     sized by its width/height attributes, not font-size). */
+  .nav-cta {
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    gap: 0;
+    border-radius: 50%;
+    justify-content: center;
+    font-size: 0;
+    flex-shrink: 0;
+  }
+
   .nav-hamburger { display: flex; }
+
+  /* Tighter gap between the icon CTA and hamburger at mobile width */
+  .nav-right { gap: 12px; }
 
   /* Hero — shrink top padding to match smaller nav */
   .home .hero {
@@ -1186,9 +1213,13 @@ nav.site-nav {
     margin-top: 24px;
   }
 
-  /* Hours card — pull out of absolute positioning, sit below hero content */
+  /* Hours card — pull out of absolute positioning, sit below hero content.
+     position:relative + z-index keeps it above the absolutely-positioned
+     .hero-bg and .hero-overlay; without it those paint over the static card
+     and it looks washed-out/translucent. Matches .hero-content's stacking. */
   .hours-card {
-    position: static;
+    position: relative;
+    z-index: 3;
     width: auto;
     margin: 0 22px 36px;
     box-shadow: 0 12px 28px rgba(13,11,38,0.22);

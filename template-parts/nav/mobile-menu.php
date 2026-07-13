@@ -12,9 +12,15 @@ $instagram = get_theme_mod( 'denver17_instagram', '' );
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Navigation menu">
 
     <div class="mobile-menu-head">
-        <img class="mobile-menu-logo"
-             src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
-             alt="<?php bloginfo( 'name' ); ?>">
+        <?php if ( has_custom_logo() ) : ?>
+            <?php the_custom_logo(); ?>
+        <?php else : ?>
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>">
+                <img class="mobile-menu-logo"
+                     src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
+                     alt="<?php bloginfo( 'name' ); ?>">
+            </a>
+        <?php endif; ?>
         <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">&#x2715;</button>
     </div>
 
