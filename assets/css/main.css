@@ -1176,22 +1176,30 @@ nav.site-nav {
   /* Member Area collapses to a circular icon button on mobile — the drawer
      carries the full-text CTA, so the top bar only needs the icon. font-size:0
      hides the bare "Member Area" text node without touching the SVG (which is
-     sized by its width/height attributes, not font-size). */
+     sized by its width/height attributes, not font-size). align-items:center
+     overrides the inline-flex baseline so the icon sits dead-center. */
   .nav-cta {
     width: 44px;
     height: 44px;
     padding: 0;
     gap: 0;
     border-radius: 50%;
+    align-items: center;
     justify-content: center;
     font-size: 0;
+    line-height: 0;
     flex-shrink: 0;
   }
 
   .nav-hamburger { display: flex; }
 
-  /* Tighter gap between the icon CTA and hamburger at mobile width */
-  .nav-right { gap: 12px; }
+  /* Push the CTA+hamburger cluster hard to the right edge (space-between alone
+     parks the lone visible flex item mid-bar because of the 88px left padding);
+     tighter gap between the two controls. */
+  .nav-right {
+    margin-left: auto;
+    gap: 12px;
+  }
 
   /* Hero — shrink top padding to match smaller nav */
   .home .hero {
