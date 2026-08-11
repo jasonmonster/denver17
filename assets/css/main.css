@@ -2372,23 +2372,28 @@ nav.site-nav {
    Pay Dues (PayPal) — denver17/pay-dues
    Temporary. Remove with the block when Stripe Checkout ships.
    -------------------------------------------------------------------------- */
+/* Horizontal margin is `auto`, never 0 — see the note above .entry-content h2.
+   A `margin: 32px 0` shorthand here flattens the centering that
+   `.page-entry-content > *` applies and pins the whole block to the left edge
+   while the surrounding prose stays centered. */
 .dues-pay {
-  margin: 32px 0;
+  margin: 32px auto;
 }
 
-.dues-pay-h {
-  font-size: 20px;
+/* These three win over the .entry-content h3/p prose rules, which are more
+   specific than a bare class and would otherwise set the size and margins. */
+.entry-content .dues-pay-h {
+  font-size: 21px;
   font-weight: 700;
   color: var(--p900);
-  margin-bottom: 10px;
+  margin: 0 auto 10px;
 }
 
-.dues-pay-intro {
+.entry-content .dues-pay-intro {
   color: var(--p800);
-  font-size: 1rem;
-  line-height: 1.7;
-  margin-bottom: 20px;
-  max-width: 52ch;
+  font-size: 16px;
+  line-height: 1.75;
+  margin: 0 auto 20px;
 }
 
 .dues-pay-buttons {
@@ -2430,12 +2435,11 @@ nav.site-nav {
   color: var(--p200);
 }
 
-.dues-pay-note {
-  margin-top: 16px;
-  font-size: 0.875rem;
+.entry-content .dues-pay-note {
+  margin: 16px auto 0;
+  font-size: 14px;
   line-height: 1.6;
-  color: var(--p800);
-  max-width: 52ch;
+  color: var(--p600);
 }
 
 @media (max-width: 560px) {
