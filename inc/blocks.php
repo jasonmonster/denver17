@@ -20,6 +20,7 @@ require_once get_template_directory() . '/blocks/events-band/render.php';
 require_once get_template_directory() . '/blocks/cta-band/render.php';
 require_once get_template_directory() . '/blocks/hours-display/render.php';
 require_once get_template_directory() . '/blocks/beer-list/render.php';
+require_once get_template_directory() . '/blocks/pay-dues/render.php';
 
 
 /**
@@ -34,6 +35,7 @@ function denver17_register_blocks() {
         'cta-band'         => 'denver17_render_block_cta_band',
         'hours-display'    => 'denver17_render_block_hours_display',
         'beer-list'        => 'denver17_render_block_beer_list',
+        'pay-dues'         => 'denver17_render_block_pay_dues',
     ];
 
     foreach ( $blocks as $block => $callback ) {

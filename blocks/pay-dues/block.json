@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "denver17/pay-dues",
+  "title": "Pay Dues (PayPal)",
+  "category": "denver17",
+  "description": "PayPal buttons for paying lodge dues online. Temporary — replaced by Stripe Checkout later.",
+  "supports": { "html": false, "className": false, "anchor": false },
+  "attributes": {
+    "heading":         { "type": "string", "default": "Pay online" },
+    "intro":           { "type": "string", "default": "Pay by card or PayPal balance. You do not need a PayPal account." },
+    "tier1Label":      { "type": "string", "default": "Regular Member" },
+    "tier1Amount":     { "type": "string", "default": "157" },
+    "tier1ItemName":   { "type": "string", "default": "2026-2027 Member Dues" },
+    "tier1ItemNumber": { "type": "string", "default": "1234" },
+    "tier2Label":      { "type": "string", "default": "Life Member" },
+    "tier2Amount":     { "type": "string", "default": "60" },
+    "tier2ItemName":   { "type": "string", "default": "Life Member Dues" },
+    "tier2ItemNumber": { "type": "string", "default": "" },
+    "note":            { "type": "string", "default": "Include your member number in the PayPal note so the Secretary can match your payment." }
+  }
+}

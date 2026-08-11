@@ -2366,3 +2366,83 @@ nav.site-nav {
   .wp-block-details,
   .wp-block-details > summary::after { transition: none; }
 }
+
+
+/* --------------------------------------------------------------------------
+   Pay Dues (PayPal) — denver17/pay-dues
+   Temporary. Remove with the block when Stripe Checkout ships.
+   -------------------------------------------------------------------------- */
+.dues-pay {
+  margin: 32px 0;
+}
+
+.dues-pay-h {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--p900);
+  margin-bottom: 10px;
+}
+
+.dues-pay-intro {
+  color: var(--p800);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  max-width: 52ch;
+}
+
+.dues-pay-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.dues-pay-form { margin: 0; }
+
+.dues-pay-btn {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  background: var(--p900);
+  color: var(--p50);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 15px 32px;
+  border: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity .15s ease;
+}
+
+.dues-pay-btn:hover { opacity: 0.82; }
+
+.dues-pay-btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.dues-pay-btn-amount {
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  color: var(--p200);
+}
+
+.dues-pay-note {
+  margin-top: 16px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--p800);
+  max-width: 52ch;
+}
+
+@media (max-width: 560px) {
+  .dues-pay-buttons { flex-direction: column; align-items: stretch; }
+  .dues-pay-btn { justify-content: space-between; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dues-pay-btn { transition: none; }
+}

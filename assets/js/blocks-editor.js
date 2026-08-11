@@ -556,4 +556,94 @@
     save: function () { return null; }
   } );
 
+
+  // ---------------------------------------------------------------------------
+  // denver17/pay-dues
+  // ---------------------------------------------------------------------------
+
+  registerBlock( 'denver17/pay-dues', {
+    edit: function ( props ) {
+      var attrs = props.attributes;
+      var set   = props.setAttributes;
+      var blockProps = useBlockProps();
+
+      // Builds the four fields for one dues tier. `n` is 1 or 2.
+      function tierPanel( n, title ) {
+        var k = function ( suffix ) { return 'tier' + n + suffix; };
+        return el( PanelBody, { title: title, initialOpen: n === 1 },
+          el( TextControl, {
+            label: 'Button label',
+            value: attrs[ k( 'Label' ) ],
+            onChange: function ( v ) { var o = {}; o[ k( 'Label' ) ] = v; set( o ); }
+          } ),
+          el( TextControl, {
+            label: 'Amount in dollars',
+            help:  'Numbers only, no dollar sign. Leave blank to hide this button.',
+            type:  'number',
+            value: attrs[ k( 'Amount' ) ],
+            onChange: function ( v ) { var o = {}; o[ k( 'Amount' ) ] = v; set( o ); }
+          } ),
+          el( TextControl, {
+            label: 'PayPal item name',
+            help:  'What the member sees at PayPal checkout and on their receipt. Update the year each dues cycle.',
+            value: attrs[ k( 'ItemName' ) ],
+            onChange: function ( v ) { var o = {}; o[ k( 'ItemName' ) ] = v; set( o ); }
+          } ),
+          el( TextControl, {
+            label: 'Item number',
+            help:  'Optional, for the Secretary’s bookkeeping.',
+            value: attrs[ k( 'ItemNumber' ) ],
+            onChange: function ( v ) { var o = {}; o[ k( 'ItemNumber' ) ] = v; set( o ); }
+          } )
+        );
+      }
+
+      var preview = [ attrs.tier1Label, attrs.tier2Label ]
+        .filter( function ( label, i ) {
+          var amount = i === 0 ? attrs.tier1Amount : attrs.tier2Amount;
+          return label && amount;
+        } )
+        .map( function ( label, i ) {
+          return label + ' $' + ( i === 0 ? attrs.tier1Amount : attrs.tier2Amount );
+        } )
+        .join( '  ·  ' );
+
+      return el( Fragment, null,
+        el( InspectorControls, null,
+          el( PanelBody, { title: 'Heading', initialOpen: true },
+            el( TextControl, {
+              label: 'Heading',
+              help:  'Leave blank to hide.',
+              value: attrs.heading,
+              onChange: function ( v ) { set( { heading: v } ); }
+            } ),
+            el( TextareaControl, {
+              label: 'Intro copy',
+              help:  'Leave blank to hide.',
+              value: attrs.intro,
+              onChange: function ( v ) { set( { intro: v } ); }
+            } )
+          ),
+          tierPanel( 1, 'First Button' ),
+          tierPanel( 2, 'Second Button' ),
+          el( PanelBody, { title: 'Small Print', initialOpen: false },
+            el( TextareaControl, {
+              label: 'Note below the buttons',
+              help:  'Leave blank to hide.',
+              value: attrs.note,
+              onChange: function ( v ) { set( { note: v } ); }
+            } ),
+            el( 'p', { style: { fontSize: '12px', color: '#757575', margin: '4px 0 0' } },
+              'Payments go to the lodge PayPal account (info@denverelks.org). Changing that address is a code change — ask Overtime.'
+            )
+          )
+        ),
+        el( 'div', blockProps,
+          canvasPlaceholder( 'Pay Dues (PayPal)', preview || '(no buttons — set an amount)' )
+        )
+      );
+    },
+    save: function () { return null; }
+  } );
+
 } )();
