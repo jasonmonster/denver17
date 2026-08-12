@@ -35,8 +35,10 @@
     <p class="hours-note">Hours subject to change for special events.</p>
     <p class="hours-note">Closing time is at bartender&rsquo;s discretion.</p>
 
-    <a class="hours-link" href="<?php echo esc_url( home_url( '/visit/' ) ); ?>">
-        See full hours &rarr;
+    <?php // Day view of the events calendar, opened on today. calendar.js reads
+          // the ?view= param; see denver17-events/assets/js/calendar.js. ?>
+    <a class="hours-link" href="<?php echo esc_url( home_url( '/events/?view=day' ) ); ?>">
+        What&rsquo;s happening today &rarr;
     </a>
 
 </div>
