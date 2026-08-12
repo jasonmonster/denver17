@@ -38,6 +38,11 @@ html {
   background: var(--p950);
 }
 
+/* Smooth in-page jumps for anchor CTAs (hero button -> #upcoming-events). */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 body {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   background: var(--p950);

@@ -12,7 +12,7 @@ function denver17_render_block_hero( $attributes ) {
         'heading_line2' => $attributes['headingLine2'] ?? '',
         'subtext'       => $attributes['subtext']      ?? '',
         'cta_text'      => $attributes['ctaText']      ?? '',
-        'cta_url'       => $attributes['ctaUrl'] ?: home_url( '/events/' ),
+        'cta_url'       => $attributes['ctaUrl']       ?? home_url( '/events/' ),
     ] );
     return ob_get_clean();
 }

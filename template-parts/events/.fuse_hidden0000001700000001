@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 $section_heading = $args['section_heading'] ?? 'Upcoming at the lodge';
 $events          = $args['events'] ?? [];
 ?>
-<section id="upcoming-events" class="events-band elks17-upcoming">
+<section class="events-band elks17-upcoming">
 
 	<div class="eb-head">
 		<div class="eb-tag">What&rsquo;s happening</div>
