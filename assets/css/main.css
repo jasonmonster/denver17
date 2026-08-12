@@ -1209,6 +1209,8 @@ nav.site-nav {
      and it looks washed-out/translucent. Matches .hero-content's stacking. */
   .hours-card {
     position: relative;
+    right: auto;
+    bottom: auto;
     z-index: 3;
     width: auto;
     margin: 0 22px 36px;
