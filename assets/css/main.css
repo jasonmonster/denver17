@@ -2007,6 +2007,67 @@ nav.site-nav {
 
 
 /* --------------------------------------------------------------------------
+   18c. Video embeds (YouTube / Vimeo)
+
+   wp-block-library is dequeued on the front end (inc/enqueue.php), and core's
+   responsive-embed CSS lives in that sheet. Without it a core Embed block
+   renders at whatever pixel size the oEmbed provider returned — 500x281 for
+   YouTube — sitting left-aligned in the 800px prose column.
+
+   These rules make the iframe fill its container at a 16:9 ratio and center
+   the figure, so an editor gets a properly sized video with no per-block
+   intervention. Setting the block to Wide width in the editor takes it to
+   1140px via the alignwide rule in section 18.
+   -------------------------------------------------------------------------- */
+.entry-content .wp-block-embed {
+  margin: 3em auto;
+}
+
+.entry-content .wp-block-embed__wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--p50);
+}
+
+/* Providers that report a different ratio get it honored rather than being
+   squeezed into 16:9. WP adds these classes from the oEmbed response. */
+.entry-content .wp-block-embed.wp-embed-aspect-4-3 .wp-block-embed__wrapper  { aspect-ratio: 4 / 3; }
+.entry-content .wp-block-embed.wp-embed-aspect-1-1 .wp-block-embed__wrapper  { aspect-ratio: 1 / 1; }
+.entry-content .wp-block-embed.wp-embed-aspect-9-16 .wp-block-embed__wrapper { aspect-ratio: 9 / 16; }
+
+.entry-content .wp-block-embed__wrapper iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+/* Fallback for an embed that came through without the wrapper div (classic
+   editor content, or a raw iframe pasted into a Custom HTML block). */
+.entry-content figure.wp-block-embed > iframe {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 8px;
+  display: block;
+}
+
+.entry-content .wp-block-embed figcaption {
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .entry-content .wp-block-embed { margin: 2em auto; }
+}
+
+
+/* --------------------------------------------------------------------------
    19. Beer List Block (denver17/beer-list)
 
    Two variants. `band` is the default: a full-bleed dark section with an
