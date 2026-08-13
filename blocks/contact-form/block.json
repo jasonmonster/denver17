@@ -1,0 +1,24 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "denver17/contact-form",
+	"title": "Contact Form",
+	"category": "widgets",
+	"icon": "email-alt",
+	"description": "Lodge contact form. Emails the secretary and saves every message in wp-admin.",
+	"textdomain": "denver17",
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"reusable": false
+	},
+	"attributes": {
+		"heading": {
+			"type": "string"
+		},
+		"intro": {
+			"type": "string"
+		}
+	},
+	"editorScript": "file:./index.js"
+}

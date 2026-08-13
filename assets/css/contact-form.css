@@ -1,0 +1,139 @@
+/* ==========================================================================
+   Contact form
+   Token names below follow the mockup (--p50…--p950, --gold). Swap them for
+   whatever the theme's design tokens are actually called before shipping.
+   ========================================================================== */
+
+.contact-form {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.contact-form__heading {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--p900, #26215C);
+  margin-bottom: 12px;
+}
+
+.contact-form__intro {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--p600, #534AB7);
+  margin-bottom: 28px;
+}
+
+.contact-form__success,
+.contact-form__errors {
+  border-radius: 12px;
+  padding: 16px 18px;
+  font-size: 15px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.contact-form__success {
+  background: var(--p50, #EEEDFE);
+  border-left: 4px solid #3FAE5C;
+  color: var(--p900, #26215C);
+}
+
+.contact-form__errors {
+  background: #fdf0f0;
+  border-left: 4px solid #b32d2e;
+  color: #7a1f20;
+}
+
+.contact-form__errors p + p {
+  margin-top: 6px;
+}
+
+.contact-form__field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.contact-form__field label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--p600, #534AB7);
+  margin-bottom: 7px;
+}
+
+.contact-form__optional {
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  color: var(--p400, #7F77DD);
+}
+
+.contact-form__field input,
+.contact-form__field select,
+.contact-form__field textarea {
+  font: inherit;
+  font-size: 16px; /* 16px stops iOS zooming on focus. */
+  color: var(--p900, #26215C);
+  background: #fff;
+  border: 1px solid var(--p200, #AFA9EC);
+  border-radius: 10px;
+  padding: 12px 14px;
+  width: 100%;
+}
+
+.contact-form__field textarea {
+  resize: vertical;
+  min-height: 150px;
+  line-height: 1.55;
+}
+
+.contact-form__field input:focus,
+.contact-form__field select:focus,
+.contact-form__field textarea:focus {
+  outline: none;
+  border-color: var(--p600, #534AB7);
+  box-shadow: 0 0 0 3px rgba(83, 74, 183, 0.18);
+}
+
+/* Honeypot: off-screen rather than display:none, which some bots skip. */
+.contact-form__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-form__actions {
+  margin-top: 26px;
+}
+
+.contact-form__submit {
+  display: inline-block;
+  background: var(--gold, #C59B3A);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 15px 32px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.contact-form__submit:hover {
+  background: var(--p900, #26215C);
+}
+
+@media (max-width: 760px) {
+  .contact-form__heading {
+    font-size: 24px;
+  }
+
+  .contact-form__submit {
+    width: 100%;
+  }
+}
