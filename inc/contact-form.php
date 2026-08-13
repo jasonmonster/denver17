@@ -255,12 +255,19 @@ function denver17_contact_handle() {
 	$hash = isset( $_POST['d17_th'] ) ? wp_unslash( $_POST['d17_th'] ) : '';
 
 	if ( ! $ts || ! hash_equals( wp_hash( $ts . '|d17contact' ), $hash ) ) {
-		denver17_contact_bail( $redirect, array( 'expired' ), $input );
+		denver17_contact_bail( $redirect, array( 'unsigned' ), $input );
 	}
 
 	$elapsed = time() - $ts;
-	if ( $elapsed < DENVER17_CONTACT_MIN_SECONDS || $elapsed > DAY_IN_SECONDS ) {
-		denver17_contact_bail( $redirect, array( 'expired' ), $input );
+
+	// Submitted in under three seconds — nobody types that fast.
+	if ( $elapsed < DENVER17_CONTACT_MIN_SECONDS ) {
+		denver17_contact_bail( $redirect, array( 'toofast' ), $input );
+	}
+
+	// Page sat open (or was served from cache) for more than a week.
+	if ( $elapsed > WEEK_IN_SECONDS ) {
+		denver17_contact_bail( $redirect, array( 'stale' ), $input );
 	}
 
 	// --- Rate limit ------------------------------------------------------
@@ -416,8 +423,17 @@ function denver17_contact_done( $redirect ) {
 	exit;
 }
 
+/**
+ * Sanitise the state token from the URL. Lowercase alphanumerics only, which
+ * is exactly what denver17_contact_bail() generates — do not swap this for
+ * sanitize_key(), which lowercases and would silently miss a mixed-case token.
+ */
+function denver17_contact_clean_token( $raw ) {
+	return substr( preg_replace( '/[^a-z0-9]/', '', strtolower( (string) $raw ) ), 0, 32 );
+}
+
 function denver17_contact_bail( $redirect, $errors, $input ) {
-	$token = wp_generate_password( 12, false, false );
+	$token = strtolower( wp_generate_password( 20, false, false ) );
 
 	set_transient(
 		'd17_contact_' . $token,

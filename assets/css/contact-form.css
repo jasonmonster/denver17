@@ -38,6 +38,12 @@
   color: var(--p900, #26215C);
 }
 
+.contact-form__success-head,
+.contact-form__errors-head {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
 .contact-form__errors {
   background: #fdf0f0;
   border-left: 4px solid #b32d2e;
@@ -46,6 +52,33 @@
 
 .contact-form__errors p + p {
   margin-top: 6px;
+}
+
+.contact-form__debug {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 10px;
+}
+
+.contact-form__field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b32d2e;
+}
+
+.contact-form__field--error input,
+.contact-form__field--error textarea {
+  border-color: #b32d2e;
+  background: #fffafa;
+}
+
+.contact-form__field--error input:focus,
+.contact-form__field--error textarea:focus {
+  border-color: #b32d2e;
+  box-shadow: 0 0 0 3px rgba(179, 45, 46, 0.16);
 }
 
 .contact-form__field {
