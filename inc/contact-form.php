@@ -44,13 +44,33 @@ function denver17_contact_topics() {
 }
 
 /**
+ * Sanitise one address or a comma-separated list. Invalid entries are dropped
+ * rather than failing the whole field.
+ */
+function denver17_contact_sanitize_emails( $value ) {
+	$out = array();
+
+	foreach ( explode( ',', (string) $value ) as $address ) {
+		$address = sanitize_email( trim( $address ) );
+		if ( is_email( $address ) ) {
+			$out[] = $address;
+		}
+	}
+
+	return implode( ', ', array_unique( $out ) );
+}
+
+/**
  * Where notifications go. Customizer field first, admin email as fallback.
+ * Accepts a comma-separated list — wp_mail() sends to all of them, and they
+ * see each other in the To line, which is fine for lodge officers.
+ *
  * Filterable so a topic can be routed elsewhere later without touching this file.
  */
 function denver17_contact_recipient( $topic = '' ) {
-	$to = get_theme_mod( 'denver17_contact_email' );
+	$to = denver17_contact_sanitize_emails( get_theme_mod( 'denver17_contact_email' ) );
 
-	if ( ! is_email( $to ) ) {
+	if ( '' === $to ) {
 		$to = get_option( 'admin_email' );
 	}
 
@@ -471,7 +491,7 @@ function denver17_contact_handle() {
 function denver17_contact_notify( $post_id, $input, $topic_label ) {
 
 	$to = denver17_contact_recipient( $input['topic'] );
-	if ( ! is_email( $to ) ) {
+	if ( '' === trim( (string) $to ) ) {
 		return false;
 	}
 
@@ -678,7 +698,7 @@ function denver17_contact_customizer( $wp_customize ) {
 		'denver17_contact_email',
 		array(
 			'default'           => get_option( 'admin_email' ),
-			'sanitize_callback' => 'sanitize_email',
+			'sanitize_callback' => 'denver17_contact_sanitize_emails',
 			'transport'         => 'refresh',
 		)
 	);
@@ -687,9 +707,9 @@ function denver17_contact_customizer( $wp_customize ) {
 		'denver17_contact_email',
 		array(
 			'label'       => __( 'Contact form recipient', 'denver17' ),
-			'description' => __( 'Where contact form messages are emailed. Defaults to the site admin address.', 'denver17' ),
+			'description' => __( 'Where contact form messages are emailed. Separate multiple addresses with commas. Defaults to the site admin address.', 'denver17' ),
 			'section'     => 'denver17_contact',
-			'type'        => 'email',
+			'type'        => 'text',
 		)
 	);
 }
