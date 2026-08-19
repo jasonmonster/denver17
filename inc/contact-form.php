@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
 define( 'DENVER17_CONTACT_CPT', 'elks_contact_msg' );
 define( 'DENVER17_CONTACT_MIN_SECONDS', 3 );      // Faster than this is a bot.
 define( 'DENVER17_CONTACT_MAX_PER_HOUR', 5 );     // Per IP.
-define( 'DENVER17_CONTACT_SPAM_THRESHOLD', 4 );   // Score at or above this = spam.
+define( 'DENVER17_CONTACT_SPAM_THRESHOLD', 3 );   // Score at or above this = spam.
 
 /**
  * Topic list. Keys are stored; values are shown.
@@ -113,6 +113,73 @@ function denver17_contact_register_spam_status() {
 	);
 }
 
+/**
+ * Does this text contain a web link?
+ *
+ * Nobody contacting a lodge about a rental needs to send a URL, and every
+ * marketing bot does. Catches schemes, bare www., markdown/BBCode, and bare
+ * domains like cutt.ly — with email addresses and the lodge's own domains
+ * removed first, since people legitimately type both.
+ */
+function denver17_contact_has_link( $text ) {
+
+	$allowed = apply_filters(
+		'denver17_contact_allowed_domains',
+		array( 'denverelks.org', 'elks.org', 'elks.torreys.brighthosted.com' )
+	);
+
+	// Email addresses are not links.
+	$check = preg_replace( '/[\w.+-]+@[\w-]+\.[\w.-]+/u', ' ', (string) $text );
+
+	foreach ( $allowed as $domain ) {
+		$check = str_ireplace( $domain, ' ', $check );
+	}
+
+	// Explicit schemes and www.
+	if ( preg_match( '#(https?:)?//|www\.|ftp://#i', $check ) ) {
+		return true;
+	}
+
+	// Markdown / BBCode link syntax.
+	if ( preg_match( '#\[url|\]\(\s*http|<a\s+href#i', (string) $text ) ) {
+		return true;
+	}
+
+	// Bare domains: cutt.ly, tinyurl.com, example.shop and friends.
+	$tlds = 'com|net|org|io|co|ly|me|us|uk|de|ru|cn|in|info|biz|xyz|top|site|online|shop|store|club|link|live|app|dev|ai|pro|vip|cc|tv|gg|sh|to|be|space|website|agency|digital|marketing';
+
+	if ( preg_match( '#\b[a-z0-9][a-z0-9-]{1,63}\.(' . $tlds . ')\b#i', $check ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Hard blocklist. Any match is filed as spam regardless of score.
+ * Filter it with a list of lowercase substrings matched against the email
+ * address, its domain, and the IP.
+ */
+function denver17_contact_blocked( $input, $ip ) {
+
+	$list = apply_filters( 'denver17_contact_blocklist', array() );
+
+	if ( ! $list ) {
+		return false;
+	}
+
+	$haystack = strtolower( $input['email'] . ' ' . $ip );
+
+	foreach ( $list as $needle ) {
+		$needle = strtolower( trim( $needle ) );
+		if ( '' !== $needle && false !== strpos( $haystack, $needle ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /* -------------------------------------------------------------------------
  * Spam scoring
  * ---------------------------------------------------------------------- */
@@ -165,10 +232,17 @@ function denver17_contact_spam_score( $input ) {
 		'denver17_contact_spam_terms',
 		array(
 			'seo', 'backlink', 'link building', 'guest post', 'domain authority',
-			'first page of google', 'search engine ranking', 'increase traffic',
-			'web design services', 'crypto', 'bitcoin', 'forex', 'casino',
-			'viagra', 'cialis', 'payday loan', 'escort', 'porn', 'sex',
-			'nude', 'earn money', 'work from home', 'binary option', 'nft',
+			'first page of google', 'search engine ranking', 'search rankings',
+			'increase traffic', 'more traffic', 'website traffic', 'your traffic',
+			'web design services', 'digital marketing', 'marketing agency',
+			'lead generation', 'more leads', 'leads and sales', 'grow your business',
+			'boost your', 'scale your', 'skyrocket',
+			'free trial', 'no contracts', 'cancel anytime', 'no obligation',
+			'crypto', 'bitcoin', 'forex', 'casino', 'viagra', 'cialis',
+			'payday loan', 'escort', 'porn', 'nude', 'earn money',
+			'work from home', 'binary option', 'nft', 'unsubscribe',
+			'i came across your website', 'i noticed your website',
+			'visitors to your site', 'to your site',
 		)
 	);
 
@@ -183,7 +257,41 @@ function denver17_contact_spam_score( $input ) {
 	}
 
 	if ( $hits ) {
-		$score += min( 4, $hits * 2 );
+		$score += min( 5, $hits * 2 );
+	}
+
+	// Cold sales pitch shape: selling AT the lodge rather than asking it
+	// something. Any two of these together is a pitch, not a question.
+	$pitch = 0;
+
+	foreach ( array( 'your website', 'your site', 'your business', 'your customers', 'your company' ) as $p ) {
+		if ( false !== strpos( $haystack, $p ) ) {
+			$pitch++;
+			$reasons[] = 'pitch:' . $p;
+			break;
+		}
+	}
+
+	foreach ( array( 'we can', 'we help', 'we offer', 'we provide', 'our team', 'our service', 'our platform', 'our ai', 'let me know if you', 'interested?', 'reply to this', 'book a call', 'schedule a call', 'quick question about' ) as $p ) {
+		if ( false !== strpos( $haystack, $p ) ) {
+			$pitch++;
+			$reasons[] = 'pitch:' . $p;
+			break;
+		}
+	}
+
+	foreach ( array( 'clients see', 'most clients', 'guaranteed', 'roi', 'conversion', 'pricing starts', 'per month', '/mo', 'discount', 'special offer' ) as $p ) {
+		if ( false !== strpos( $haystack, $p ) ) {
+			$pitch++;
+			$reasons[] = 'pitch:' . $p;
+			break;
+		}
+	}
+
+	if ( $pitch >= 2 ) {
+		$score += 4;
+	} elseif ( $pitch ) {
+		$score += 2;
 	}
 
 	// Domain that can't receive mail is a made-up address.
@@ -292,6 +400,9 @@ function denver17_contact_handle() {
 	if ( mb_strlen( $input['message'] ) < 5 ) {
 		$errors[] = 'message';
 	}
+	if ( denver17_contact_has_link( $input['message'] ) || denver17_contact_has_link( $input['name'] ) || denver17_contact_has_link( $input['phone'] ) ) {
+		$errors[] = 'nolinks';
+	}
 	if ( ! isset( $topics[ $input['topic'] ] ) ) {
 		$input['topic'] = 'general';
 	}
@@ -310,6 +421,11 @@ function denver17_contact_handle() {
 	$topic_label = $topics[ $input['topic'] ];
 	$spam        = denver17_contact_spam_score( $input );
 	$is_spam     = $spam['score'] >= DENVER17_CONTACT_SPAM_THRESHOLD;
+
+	if ( denver17_contact_blocked( $input, $ip ) ) {
+		$is_spam           = true;
+		$spam['reasons'][] = 'blocklist';
+	}
 
 	$post_id = wp_insert_post(
 		wp_slash(

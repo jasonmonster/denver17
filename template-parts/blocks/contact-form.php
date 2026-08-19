@@ -45,6 +45,7 @@ $messages = array(
 	'name'      => __( 'Please add your name.', 'denver17' ),
 	'email'     => __( 'That email address doesn\'t look right — check for a typo.', 'denver17' ),
 	'message'   => __( 'Please write a message before sending.', 'denver17' ),
+	'nolinks'   => __( 'Please remove any web links — this form doesn\'t accept them. Describe what you need and we\'ll follow up by email or phone.', 'denver17' ),
 	'toofast'   => __( 'That came through faster than a person can type, so it was blocked as automated. Please send it again.', 'denver17' ),
 	'stale'     => __( 'This page had been open a while. Please reload it and send your message again.', 'denver17' ),
 	'unsigned'  => __( 'The form didn\'t submit properly. Please reload the page and try again.', 'denver17' ),
@@ -55,7 +56,13 @@ $messages = array(
 
 // Which specific inputs to flag.
 $field_errors = array_intersect( $errors, array( 'name', 'email', 'message' ) );
-$first_bad    = $field_errors ? reset( $field_errors ) : '';
+
+// A rejected link is a problem with the message box.
+if ( in_array( 'nolinks', $errors, true ) && ! in_array( 'message', $field_errors, true ) ) {
+	$field_errors[] = 'message';
+}
+
+$first_bad = $field_errors ? reset( $field_errors ) : '';
 
 /**
  * Print the class and ARIA attributes for a field.
@@ -160,7 +167,7 @@ $ts = time();
 				<label for="d17_message"><?php esc_html_e( 'Message', 'denver17' ); ?> <span aria-hidden="true">*</span></label>
 				<textarea id="d17_message" name="d17_message" rows="6" required<?php echo $field_attrs( 'message' ); // phpcs:ignore WordPress.Security.EscapeOutput ?>><?php echo esc_textarea( $old['message'] ); ?></textarea>
 				<?php if ( in_array( 'message', $field_errors, true ) ) : ?>
-					<span class="contact-form__field-error" id="d17_message_error"><?php echo esc_html( $messages['message'] ); ?></span>
+					<span class="contact-form__field-error" id="d17_message_error"><?php echo esc_html( in_array( 'nolinks', $errors, true ) ? $messages['nolinks'] : $messages['message'] ); ?></span>
 				<?php endif; ?>
 			</p>
 
