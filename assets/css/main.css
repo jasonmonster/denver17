@@ -2569,3 +2569,62 @@ nav.site-nav {
 @media (prefers-reduced-motion: reduce) {
   .dues-pay-btn { transition: none; }
 }
+
+
+/* --------------------------------------------------------------------------
+   20. 404 Error Page
+   -------------------------------------------------------------------------- */
+.error-404-content {
+  background: #fff;
+  padding-top: 56px;
+  padding-bottom: 72px;
+}
+
+.error-404 {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.error-404-photo {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 20px 44px rgba(13, 11, 38, 0.18);
+}
+
+.error-404-body {
+  margin-top: 28px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--p800);
+}
+
+.error-404-actions {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+}
+
+.error-404-actions .hero-btn { margin-top: 0; }
+
+.error-404-link {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--p600);
+  text-decoration: none;
+  border-bottom: 1px solid var(--p400);
+  padding-bottom: 2px;
+}
+
+.error-404-link:hover { color: var(--p800); }
+
+@media (max-width: 560px) {
+  .error-404-content { padding-top: 36px; padding-bottom: 48px; }
+  .error-404-actions { flex-direction: column; gap: 16px; }
+}
