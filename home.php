@@ -1,44 +1,31 @@
 <?php
 /**
- * Archive Template
+ * Blog / News Index Template
  *
- * Used for category, tag, author, and date archives.
- * Text-only list — no featured images by design (see home.php, same list
- * markup/classes). Each item shows date, title, excerpt, and a linked
- * category eyebrow (skipped when it would just link back to the category
- * archive you're already on).
+ * WordPress's standard "posts page" template — used when Settings → Reading →
+ * "Posts page" is set to the News page (see bin/setup.php, page_for_posts).
+ * Text-only list, deliberately no featured images — the lodge will never use
+ * them here, so there's no thumbnail markup to keep in sync. Each item shows
+ * a linked category eyebrow, date, title, and excerpt.
+ *
+ * Members Only posts never reach this loop — inc/post-visibility.php strips
+ * them out via pre_get_posts until member login exists.
  */
 
 get_header();
 
-// Banner: clean eyebrow and title without WP's default "Category: X" prefix
-$archive_eyebrow = '';
-$archive_title   = '';
-
-if ( is_category() ) {
-    $archive_eyebrow = 'Category';
-    $archive_title   = single_cat_title( '', false );
-} elseif ( is_tag() ) {
-    $archive_eyebrow = 'Tag';
-    $archive_title   = single_tag_title( '', false );
-} elseif ( is_author() ) {
-    $archive_eyebrow = 'Author';
-    $archive_title   = get_the_author();
-} elseif ( is_date() ) {
-    $archive_eyebrow = 'Archive';
-    $archive_title   = get_the_date( 'F Y' );
-} else {
-    $archive_title = get_the_archive_title();
-}
+$posts_page_id   = (int) get_option( 'page_for_posts' );
+$banner_title     = $posts_page_id ? get_the_title( $posts_page_id ) : 'News';
+$banner_subtitle  = $posts_page_id ? get_the_excerpt( $posts_page_id ) : '';
 ?>
 
 <main id="main" class="site-main">
 
     <?php
     get_template_part( 'template-parts/page/banner', null, [
-        'eyebrow'  => $archive_eyebrow,
-        'title'    => $archive_title,
-        'subtitle' => get_the_archive_description(),
+        'eyebrow'  => "What's happening",
+        'title'    => $banner_title,
+        'subtitle' => $banner_subtitle,
     ] );
     ?>
 
@@ -50,16 +37,16 @@ if ( is_category() ) {
                 <?php while ( have_posts() ) : the_post(); ?>
 
                     <?php
-                    $cats        = get_the_category();
-                    $cat         = $cats ? $cats[0] : null;
-                    $on_this_cat = $cat && is_category() && (int) $cat->term_id === get_queried_object_id();
+                    $cats     = get_the_category();
+                    $cat_name = $cats ? $cats[0]->name : '';
+                    $cat_link = $cats ? get_category_link( $cats[0]->term_id ) : '';
                     ?>
 
                     <article <?php post_class( 'archive-item' ); ?>>
 
                         <div class="archive-item-meta">
-                            <?php if ( $cat && ! $on_this_cat ) : ?>
-                                <a class="archive-item-cat" href="<?php echo esc_url( get_category_link( $cat->term_id ) ); ?>"><?php echo esc_html( $cat->name ); ?></a>
+                            <?php if ( $cat_name ) : ?>
+                                <a class="archive-item-cat" href="<?php echo esc_url( $cat_link ); ?>"><?php echo esc_html( $cat_name ); ?></a>
                                 <span aria-hidden="true">&middot;</span>
                             <?php endif; ?>
                             <time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
@@ -94,7 +81,7 @@ if ( is_category() ) {
 
         <?php else : ?>
 
-            <p class="archive-empty">Nothing here yet.</p>
+            <p class="archive-empty">No news yet &mdash; check back soon.</p>
 
         <?php endif; ?>
 

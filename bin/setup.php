@@ -87,6 +87,11 @@ $page_tree = [
         'children' => [],
     ],
     [
+        'title'    => 'News',
+        'slug'     => 'news',
+        'children' => [],
+    ],
+    [
         'title'    => 'Contact',
         'slug'     => 'contact',
         'children' => [],
@@ -230,7 +235,7 @@ $footer_menu_id  = d17_get_or_create_menu( 'Footer Navigation' );
 WP_CLI::log( '' );
 WP_CLI::log( '=== Step 3: Populate Primary Menu ===' );
 
-$primary_top_level = [ 'visit', 'learn', 'community', 'events', 'contact' ];
+$primary_top_level = [ 'visit', 'learn', 'community', 'events', 'news', 'contact' ];
 
 foreach ( $primary_top_level as $slug ) {
     if ( empty( $page_ids[ $slug ] ) ) continue;
@@ -320,6 +325,45 @@ if ( $front_page_id ) {
     WP_CLI::warning( 'Could not set front page — home page ID not found.' );
 }
 
+$news_page_id = $page_ids['news'] ?? 0;
+
+if ( $news_page_id ) {
+    update_option( 'page_for_posts', $news_page_id );
+    WP_CLI::success( "Posts page (News feed) set to: news [{$news_page_id}]" );
+    WP_CLI::log( '  Uses home.php — publish the News page for it to go live at /news/.' );
+} else {
+    WP_CLI::warning( 'Could not set posts page — news page ID not found.' );
+}
+
+// =============================================================================
+// 8. NEWS CATEGORIES
+// Starter categories for the News feed. Editors can add more from
+// Posts → Categories at any time — this just seeds the ones already agreed on.
+// =============================================================================
+
+WP_CLI::log( '' );
+WP_CLI::log( '=== Step 8: News Categories ===' );
+
+$news_categories = [
+    'Flashlight – Monthly Newsletter',
+    'Weekly News',
+    'Announcement',
+];
+
+foreach ( $news_categories as $cat_name ) {
+    $existing = get_term_by( 'name', $cat_name, 'category' );
+    if ( $existing ) {
+        WP_CLI::log( "  Exists: {$cat_name}" );
+        continue;
+    }
+    $result = wp_insert_term( $cat_name, 'category' );
+    if ( is_wp_error( $result ) ) {
+        WP_CLI::warning( "  Failed to create category: {$cat_name} — " . $result->get_error_message() );
+        continue;
+    }
+    WP_CLI::success( "  Created category: {$cat_name}" );
+}
+
 // =============================================================================
 // DONE
 // =============================================================================
@@ -328,3 +372,4 @@ WP_CLI::log( '' );
 WP_CLI::success( 'Setup complete. Review drafts in WP Admin → Pages, then publish when ready.' );
 WP_CLI::log( 'Next: upload the logo via Appearance → Customize → Site Identity.' );
 WP_CLI::log( 'Next: set homepage images via Appearance → Customize → Homepage Images.' );
+WP_CLI::log( 'Next: publish the News page so the /news/ feed goes live.' );

@@ -53,6 +53,9 @@ Local repo path: `/Users/jasonackerman/Dropbox (Personal)/Overtime Agency/BPOE 1
 | `footer.php` | Footer with social links and footer nav |
 | `front-page.php` | Homepage — renders via `the_content()` using custom blocks |
 | `page.php` | Static page template |
+| `home.php` | News feed template (WP "posts page") — text-only list, no featured images; category eyebrow, "Members" pill on `both`-visibility posts |
+| `inc/post-visibility.php` | Public / Members Only / Both meta box on Posts; hides Members Only from public feeds/archives/search and blocks its single URL — see Key Decisions |
+| `inc/disable-comments.php` | Forces comments/pings off site-wide and hides the admin Comments UI — comments are permanently off by design |
 | `index.php` | Minimal fallback loop |
 | `template-parts/nav/mobile-menu.php` | Slide-in mobile drawer |
 | `template-parts/home/hero.php` | Hero section — accepts `$args` from block render |
@@ -233,6 +236,29 @@ Status values: `On Tap`, `Coming Soon`, `Not In Stock`. Only the first two are d
 - [ ] Replace `events-band.php` static placeholder with live plugin output
 - [ ] CPTs: events, ticket types, orders
 
+### ✅ Session 7 — News Page & Post Visibility
+
+- [x] `home.php` — News feed ("posts page"), text-only list (see below), reuses `archive.php`'s banner
+- [x] `inc/post-visibility.php` — Public / Members Only / Both meta box (sidebar radio field, no ACF); `_denver17_visibility` post meta
+- [x] Members Only posts excluded from the News feed, category/tag/date/author archives, and search via `pre_get_posts`
+- [x] Members Only single post URL blocked (redirects home) via `template_redirect` — no login system exists yet to gate against, so this is a hard block for everyone until it does
+- [x] "Both" posts show a small gold "Members" pill inline in their News item's meta line
+- [x] Admin list column (Posts → All Posts) shows each post's visibility at a glance
+- [x] Category eyebrow on each News/archive item, linked to that category's archive (reuses existing `archive.php` template — no new template needed)
+- [x] `bin/setup.php` — News page added to `$page_tree` and `$primary_top_level`; sets `page_for_posts`; seeds 3 starter categories (Flashlight – Monthly Newsletter, Weekly News, Announcement)
+- [x] `bin/rebuild-menus.php` — News added to the top-level (flat-link) menu section alongside Events and Contact
+
+**Not built:** the actual members-only feed (showing Members Only + Both content to a logged-in member). That depends on the member login system, which doesn't exist yet — tracked as future work, not started.
+
+### ✅ Session 7.1 — Text-Only News, Featured Images Removed, Comments Confirmed Off
+
+- [x] `home.php` and `archive.php` switched from an image-card grid to a text-only list (`.archive-list` / `.archive-item`) — the lodge will never use featured images on Posts, so the thumbnail/placeholder markup and its CSS were removed rather than left dormant
+- [x] `single.php` — removed the featured-image block (and its now-dead CSS) for the same reason; single posts open straight into the content
+- [x] Confirmed no template ever called `comments_template()`, `comment_form()`, or `wp_list_comments()` — comments were already invisible on the front end
+- [x] `inc/disable-comments.php` (new) — makes "no comments, ever" an enforced decision instead of an accident: forces `comments_open`/`pings_open` to `false` site-wide (can't be flipped on per-post from wp-admin), removes the admin Comments menu and admin-bar bubble, drops the comment-reply script
+- [x] `inc/theme-setup.php` — removed `'comment-form'`/`'comment-list'` from the `html5` theme support array; nothing renders them
+- [x] `add_theme_support( 'post-thumbnails' )` left in place — still needed by the events plugin's event card images; only the theme's own Post-related templates stopped using thumbnails
+
 ### Backlog — Not Yet Scheduled
 
 Decided-to-do, no session assigned yet. Added 2026-07-10.
@@ -257,6 +283,8 @@ Decided-to-do, no session assigned yet. Added 2026-07-10.
 **Beer list:** Google Sheet-driven via `inc/beer-feed.php`. Same published CSV URL pattern as hours. Sheet columns: A=ID, B=Name, C=Style, D=ABV, E=Status, F=Order. Status values are `On Tap`, `Coming Soon`, `Not In Stock`. Beers sorted by Order column within each section. The sheet format (Web page vs CSV) in the Publish to web dialog doesn't matter — we construct the CSV URL directly from the `2PACX-...` ID regardless of what format was selected when publishing.
 
 **Member Area:** No login gate. The Member Area nav item exists for content relevant to current members (dues link, Slack invite, how-to docs), but no authentication is implemented. Maintainability was the deciding factor.
+
+**Post visibility (News):** Same "no login yet" reality as the Member Area, applied to Posts. `inc/post-visibility.php` adds a Public / Members Only / Both radio field per post. Since there's no member session to check, Members Only is enforced as a blanket rule for now — hidden from every public listing (News feed, category/tag/date/author archives, search) and its own URL redirects home for everyone, not just non-members. When member login ships, this is the file to revisit: swap the unconditional single-post block for an `is_member_logged_in()`-style check, and build the members-only feed that shows Members Only + Both content. "Both" posts are unaffected by any of this — they're public today and will also surface in that future members feed.
 
 **Live data pattern:** Google Sheets as the CMS for hours and beer list. Fetch via published CSV URL (`/d/e/2PACX-.../pub?output=csv&sheet=TabName`), cached server-side with WP transients. The `gviz/tq` endpoint is unreliable on this host even with correct sharing settings — always use the published URL.
 

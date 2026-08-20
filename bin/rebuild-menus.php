@@ -133,10 +133,11 @@ $community = d17_menu_page( $menu_id, d17_page_id( 'community' ) );
     d17_menu_page( $menu_id, d17_page_id( 'scholarships' ),         '',               $community );
     d17_menu_page( $menu_id, d17_page_id( 'scouts' ),               '',               $community );
 
-// ----- Events & Contact (top-level, no children) -----
+// ----- Events, News & Contact (top-level, no children) -----
 WP_CLI::log( '' );
 WP_CLI::log( 'Top-level:' );
 d17_menu_page( $menu_id, d17_page_id( 'events' ) );
+d17_menu_page( $menu_id, d17_page_id( 'news' ) );
 d17_menu_page( $menu_id, d17_page_id( 'contact' ) );
 
 // =============================================================================

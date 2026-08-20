@@ -13,11 +13,11 @@ function denver17_setup() {
     // Featured images
     add_theme_support( 'post-thumbnails' );
 
-    // HTML5 markup for core elements
+    // HTML5 markup for core elements. Comments are permanently disabled
+    // (see inc/disable-comments.php), so 'comment-form'/'comment-list' are
+    // deliberately left out — nothing in the theme will ever render them.
     add_theme_support( 'html5', [
         'search-form',
-        'comment-form',
-        'comment-list',
         'gallery',
         'caption',
         'style',

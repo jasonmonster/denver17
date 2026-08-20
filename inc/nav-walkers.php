@@ -58,7 +58,7 @@ class Denver17_Nav_Walker extends Walker_Nav_Menu {
                 // Hover opens the mega menu — span is intentional (not a link)
                 $output .= '<span class="nav-item-label">' . esc_html( $item->title ) . '</span>';
             } else {
-                // No children: must be a real link (Events, Contact)
+                // No children: must be a real link (Events, News, Contact)
                 $output .= '<a class="nav-item-label" href="' . esc_url( $item->url ) . '">' . esc_html( $item->title ) . '</a>';
             }
             return;

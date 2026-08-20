@@ -33,15 +33,6 @@ get_header();
 
         <article id="post-<?php the_ID(); ?>" <?php post_class( 'page-article' ); ?>>
 
-            <div class="single-featured-img">
-                <?php if ( has_post_thumbnail() ) : ?>
-                    <?php the_post_thumbnail( 'full' ); ?>
-                <?php else : ?>
-                    <img src="<?php echo esc_url( denver17_placeholder( 1200, 630, 'Post Featured Photo' ) ); ?>"
-                         alt="">
-                <?php endif; ?>
-            </div>
-
             <div class="entry-content page-entry-content">
                 <?php the_content(); ?>
             </div>
