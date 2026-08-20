@@ -880,6 +880,29 @@ nav.site-nav {
   font-size: 16px;
 }
 
+.eb-view-all {
+  text-align: center;
+  margin-top: 42px;
+}
+
+.eb-view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--gold);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 14px 28px;
+  border-radius: 999px;
+  transition: opacity 0.15s ease;
+}
+.eb-view-all-btn:hover { opacity: 0.88; }
+.eb-view-all-arrow { transition: transform 0.15s ease; }
+.eb-view-all-btn:hover .eb-view-all-arrow { transform: translateX(3px); }
+
 @media (max-width: 640px) {
   .eb-nav--prev { left: 2px; }
   .eb-nav--next { right: 2px; }

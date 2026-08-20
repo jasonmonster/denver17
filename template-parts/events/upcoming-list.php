@@ -111,4 +111,10 @@ $events          = $args['events'] ?? [];
 
 	<?php endif; ?>
 
+	<div class="eb-view-all">
+		<a class="eb-view-all-btn" href="<?php echo esc_url( home_url( '/events/' ) ); ?>">
+			View All Events<span class="eb-view-all-arrow" aria-hidden="true">&rarr;</span>
+		</a>
+	</div>
+
 </section>
