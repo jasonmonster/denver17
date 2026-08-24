@@ -176,6 +176,42 @@ function denver17_contact_has_link( $text ) {
 }
 
 /**
+ * Has this address had a message filed as spam before?
+ *
+ * Self-training: once Leo or Megan leaves something in the Spam view, that
+ * sender is blocked. Clicking "Not spam — deliver it" publishes the message,
+ * so it stops matching and the sender is unblocked in the same action.
+ *
+ * Matched on email only, not IP — shared and carrier-grade NAT means an IP
+ * can be a whole neighbourhood.
+ */
+function denver17_contact_seen_spam( $email ) {
+
+	if ( ! is_email( $email ) ) {
+		return false;
+	}
+
+	$prior = get_posts(
+		array(
+			'post_type'        => DENVER17_CONTACT_CPT,
+			'post_status'      => 'elks_spam',
+			'posts_per_page'   => 1,
+			'fields'           => 'ids',
+			'no_found_rows'    => true,
+			'suppress_filters' => false,
+			'meta_query'       => array(
+				array(
+					'key'   => '_contact_email',
+					'value' => $email,
+				),
+			),
+		)
+	);
+
+	return ! empty( $prior );
+}
+
+/**
  * Hard blocklist. Any match is filed as spam regardless of score.
  * Filter it with a list of lowercase substrings matched against the email
  * address, its domain, and the IP.
@@ -339,6 +375,127 @@ function denver17_contact_spam_score( $input ) {
 		$reasons[] = 'blob';
 	}
 
+	// --- Name shape ------------------------------------------------------
+	// "RobertBup": one token, internal capital. Bot name generators do this
+	// constantly and people never do. Real surname prefixes are exempted.
+	$name_trim = trim( $name );
+
+	if ( '' !== $name_trim && ! preg_match( '/\s/u', $name_trim ) ) {
+		$exempt = preg_match( '/^(Mc|Mac|De|Di|Du|Da|La|Le|Van|Von|O\'|D\')/u', $name_trim );
+
+		if ( ! $exempt && preg_match( '/\p{Ll}\p{Lu}/u', $name_trim ) ) {
+			$score    += 5;
+			$reasons[] = 'name-camel';
+		}
+	}
+
+	if ( preg_match( '/\d/u', $name_trim ) ) {
+		$score    += 4;
+		$reasons[] = 'name-digits';
+	}
+
+	// --- Phone shape -----------------------------------------------------
+	// Optional field, but if it's filled it should look North American.
+	// 11 digits starting with 8 is the Russian format these bots default to.
+	$digits = preg_replace( '/\D/', '', (string) $input['phone'] );
+
+	if ( '' !== $digits ) {
+		$nanp = ( 10 === strlen( $digits ) && ! in_array( $digits[0], array( '0', '1' ), true ) )
+			|| ( 11 === strlen( $digits ) && '1' === $digits[0] );
+
+		if ( ! $nanp ) {
+			$score    += 3;
+			$reasons[] = 'phone-shape';
+		}
+	}
+
+	// --- Sender domain ---------------------------------------------------
+	$domain_l = strtolower( $domain );
+
+	$bad_domains = apply_filters(
+		'denver17_contact_spam_domains',
+		array( '.ru', '.su', '.cn', '.tk', '.top', '.xyz', '.click', '.work', '.buzz', 'mail.ru', 'yandex.', 'rambler.', 'list.ru', 'bk.ru', 'inbox.ru' )
+	);
+
+	foreach ( $bad_domains as $bad ) {
+		$match = ( '.' === substr( $bad, 0, 1 ) )
+			? ( substr( $domain_l, -strlen( $bad ) ) === $bad )
+			: ( false !== strpos( $domain_l, $bad ) );
+
+		if ( $match ) {
+			$score    += 4;
+			$reasons[] = 'domain:' . $bad;
+			break;
+		}
+	}
+
+	// --- Rare diacritics -------------------------------------------------
+	// Icelandic/Nordic/Turkish characters. Spanish, German and French accents
+	// are deliberately NOT here — Denver has speakers of all three and a
+	// member might well write in them.
+	if ( preg_match( '/[þðæøåłżșțğıĉĝĥĵŝŭ]/iu', $name . ' ' . $message ) ) {
+		$score    += 3;
+		$reasons[] = 'diacritics';
+	}
+
+	// --- Does the message reference this lodge at all? -------------------
+	$lodge_words = apply_filters(
+		'denver17_contact_lodge_words',
+		array(
+			'elk', 'lodge', 'bpoe', '#17', 'member', 'dues', 'initiat',
+			'rent', 'hall', 'room', 'venue', 'reception', 'memorial', 'wedding',
+			'bar', 'beer', 'drink', 'kitchen', 'food', 'menu', 'patio', 'garden',
+			'event', 'ticket', 'band', 'music', 'bingo', 'poker', 'cribbage',
+			'meeting', 'officer', 'secretary', 'veteran', 'charity', 'scholarship',
+			'hour', 'open', 'closed', 'parking', 'address', 'direction',
+			'elkstock', 'oktoberfest', 'denver', 'tennyson', '26th', 'saturday',
+			'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday',
+		)
+	);
+
+	$lodge_ref = false;
+
+	foreach ( $lodge_words as $w ) {
+		if ( false !== strpos( $haystack, $w ) ) {
+			$lodge_ref = true;
+			break;
+		}
+	}
+
+	// Generic probe: short, polite, and says nothing about this lodge.
+	// Only 2 on its own, so a real terse question still gets through.
+	if ( ! $lodge_ref && mb_strlen( $message ) < 200 ) {
+		$score    += 2;
+		$reasons[] = 'generic';
+	}
+
+	// "I wanted to know your price", in whatever locale, without ever saying
+	// what they'd be pricing.
+	if ( ! $lodge_ref ) {
+		foreach ( array( 'price', 'precio', 'preço', 'prezzo', 'preis', 'prix', 'verð', 'цена', 'fiyat', 'quote' ) as $w ) {
+			if ( false !== strpos( $haystack, $w ) ) {
+				$score    += 3;
+				$reasons[] = 'price-probe';
+				break;
+			}
+		}
+	}
+
+	// Mailing-list harvesting probe.
+	$list_probes = array(
+		'subscribe to your', 'your mailing list', 'send me updates', 'send me news',
+		'news and updates', 'stay informed', 'weekly updates', 'newsletter signup',
+		'add me to your list', 'look forward to hearing from you',
+	);
+
+	foreach ( $list_probes as $w ) {
+		if ( false !== strpos( $haystack, $w ) ) {
+			$score    += 2;
+			$reasons[] = 'list-probe';
+			break;
+		}
+	}
+
 	/**
 	 * Final say on the score. Return 0 to force-allow, a big number to block.
 	 */
@@ -445,6 +602,11 @@ function denver17_contact_handle() {
 	if ( denver17_contact_blocked( $input, $ip ) ) {
 		$is_spam           = true;
 		$spam['reasons'][] = 'blocklist';
+	}
+
+	if ( ! $is_spam && denver17_contact_seen_spam( $input['email'] ) ) {
+		$is_spam           = true;
+		$spam['reasons'][] = 'repeat-sender';
 	}
 
 	$post_id = wp_insert_post(
