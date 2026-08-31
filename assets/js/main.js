@@ -20,6 +20,8 @@
   //   special    string          notice text, or empty
   //   display_1  string          base hours line 1
   //   display_2  string          base hours line 2, or empty to hide
+  //   degraded   '1' | ''        the feed is down and there is no cached copy
+  //   stale      '1' | ''        served from the last known-good sheet copy
   //
   // Dev preview: add ?hours=open, ?hours=opens_at, or ?hours=closed
   // to the URL to force a specific state without waiting for the clock.
@@ -74,26 +76,40 @@
     dateEl.textContent = DAY_NAMES[ now.getDay() ] + ', '
       + MONTH_NAMES[ now.getMonth() ] + '\u00a0' + now.getDate();
 
-    // Hours data from Sheets via wp_localize_script, with hardcoded fallback
+    // Hours data from Sheets via wp_localize_script.
+    //
+    // There is deliberately no hardcoded schedule fallback here. This card used
+    // to fall back to Tue-Sat 5:30PM defaults, which kept rendering plausible
+    // but wrong hours for weeks while the sheet fetch was silently failing \u2014
+    // it showed CLOSED TODAY on Mondays when the lodge was open. If we don't
+    // have real data we say so, because someone reads this before driving over.
     var h = ( typeof window.denver17Hours !== 'undefined' && window.denver17Hours )
       ? window.denver17Hours
-      : {
-          open_time:  ( now.getDay() >= 2 && now.getDay() <= 6 ) ? '17:30' : '',
-          close_time: '',
-          special:    '',
-          display_1:  'Tue\u2013Sat \u00b7 5:30PM\u2013Close',
-          display_2:  '',
-        };
+      : { degraded: '1' };
 
-    // Dev preview: ?hours=open | opens_at | closed
+    // Dev preview: ?hours=open | opens_at | closed | degraded
     // Forces a specific state without waiting for real time to match.
     var previewState = new URLSearchParams( window.location.search ).get( 'hours' );
     if ( previewState === 'open' ) {
-      h = Object.assign( {}, h, { open_time: '00:00' } );
+      h = Object.assign( {}, h, { open_time: '00:00', degraded: '' } );
     } else if ( previewState === 'opens_at' ) {
-      h = Object.assign( {}, h, { open_time: '23:59' } );
+      h = Object.assign( {}, h, { open_time: '23:59', degraded: '' } );
     } else if ( previewState === 'closed' ) {
-      h = Object.assign( {}, h, { open_time: '' } );
+      h = Object.assign( {}, h, { open_time: '', degraded: '' } );
+    } else if ( previewState === 'degraded' ) {
+      h = Object.assign( {}, h, { degraded: '1' } );
+    }
+
+    // Feed is down with nothing cached: show an honest unknown state. No status
+    // class is added, so the dot and label stay the neutral default grey rather
+    // than the red that means "closed".
+    if ( h.degraded ) {
+      statusEl.textContent = 'Hours unavailable';
+      rangeEl.hidden = true;
+      if ( baseEl ) {
+        baseEl.textContent = 'Please call the lodge for today’s hours.';
+      }
+      return;
     }
 
     // Compute live open/closed status
