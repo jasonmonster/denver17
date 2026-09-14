@@ -78,26 +78,76 @@ remembers it existed.
    post status: stored, never emailed, out of the main list behind a "Spam" filter link.
    The sender sees the normal success screen so a bot learns nothing.
 
-Scoring signals: sales-pitch shape (second-person targeting + seller voice + offer
-language — any two scores 4), SEO/pharma/crypto vocabulary, non-Latin scripts
-(Cyrillic/CJK/Arabic/Thai; accented Latin passes), email domain with no MX or A record,
-the same body twice in 24 hours, and long text with almost no whitespace.
+Scoring signals: bot name shape (single token with an internal capital, like
+"RobertBup" — surname prefixes Mc/Mac/De/Van/O' are exempt), digits in the name, a phone
+that isn't North American (11 digits starting with 8 is the Russian format these bots
+default to), sender domains on `.ru`/`.su`/`.tk`/`.xyz` and friends, rare diacritics
+(Icelandic/Nordic/Turkish — Spanish, German and French accents are deliberately absent,
+since Denver has speakers of all three), sales-pitch shape (second-person targeting +
+seller voice + offer language, any two scores 4), SEO/pharma/crypto vocabulary, no MX or
+A record on the email domain, the same body twice in 24 hours, and long text with almost
+no whitespace.
+
+Two rules key off whether the message mentions the lodge at all, matched against a
+vocabulary list (`elk`, `lodge`, `rent`, `hall`, `beer`, `membership`, `Elkstock`,
+weekdays, and ~40 more). A short message with no lodge reference scores 2 — enough to
+combine, never enough alone, so "Are you open today?" still gets through. On top of
+that, a price enquiry that never says what's being priced scores 3, and mailing-list
+harvesting language ("subscribe to your", "send me news and updates") scores 2.
+
+Two rules run outside the score, as outright blocks. The same message body arriving
+from a *different* address than one already on file is spam regardless of what it says —
+which is what catches a template drip-fed over weeks under rotating names. Matching on a
+different sender means a member resending their own unanswered message isn't punished
+for it. Fingerprints normalise case and punctuation, so cosmetic edits don't evade it.
+
+**The filter trains itself.** Any address that already has a message sitting in the Spam
+view is blocked outright on its next attempt. Clicking "Not spam — deliver it" publishes
+that message, which stops it matching and unblocks the sender in the same action — so
+the only maintenance is the one Leo or Megan would do anyway.
 
 **False positives are one click.** The edit screen shows the score and exactly which
 rules fired, with a "Not spam — deliver it" button that publishes the message and sends
 the notification that was withheld. Held spam self-deletes after 30 days.
 
-### What got through before this, and why
+### What got through, and what changed
 
-The first live spam was a Vantovo AI-traffic pitch from a real Gmail address with a
-plausible name and one shortened link. It scored 0 against the original rules: the link
-count needed two, the domain had valid MX, and none of the original terms matched.
+**Round one — the Vantovo pitch.** An AI-traffic sales pitch from a real Gmail address
+with a plausible name and one shortened link. Scored 0: the link rule needed two, the
+domain had valid MX, no terms matched. Response was the no-links rule, the pitch
+detector, a threshold drop from 4 to 3, and a much longer term list. It scores 9 now,
+and is link-rejected before scoring runs.
 
-Rewritten, it scores 9 and is link-rejected before scoring even runs. Strip the URL and
-it still scores 9. Tested alongside a rental enquiry, a membership question, an Elkstock
-question, and a hours-are-wrong bug report — all score 0, except the bug report at 2,
-which is under the line but only just. If a member's genuine complaint ever lands in
-Spam, that's the rule to loosen: require two pitch signals instead of one.
+**Round two — four form probes.** Short, polite, no links, testing whether the form
+delivers: two identical "I wanted to know your price" messages (Icelandic and Spanish)
+from "RobertBup" with 11-digit Russian phone numbers, a mail.ru address asking to
+subscribe to the mailing list, and a Gmail address asking for "updates about weekly
+updates". Round-one rules caught none of them. Round two added name shape, phone shape,
+domain reputation, diacritics, the lodge-reference test, and the two probe templates.
+They now score 16, 13, 8 and 4.
+
+**Round three — the site's own name as camouflage.** "I would like more information.
+Please contact me by email — denver elks lodge #17." The trailing mail-merged site title
+satisfied the round-two lodge-reference test, which was the whole point of it. Fix: strip
+the site's own name and domain from the message before testing whether the sender
+demonstrates any knowledge of the lodge. Added alongside it: a contentless
+information-request probe ("more information", "please contact me", "interested in your"),
+gated on the lodge test so "I'd like more information about renting the hall" is
+unaffected; a weak signal for an address bearing no relation to the stated name with no
+separator in the local part (`Matthew Anderson <xEisei@gmail.com>`); and the persistent
+duplicate-body rule above, since these arrive verbatim over weeks and the old 24-hour
+transient never saw the repeat. Scores 7.
+
+Regression-tested against twelve legitimate messages: a rental enquiry, a membership
+question, an Elkstock guest question, a hours-are-wrong bug report, "What time does the
+beer garden open Friday?", a real request to join the email list, "Are you open today?",
+a sender named McDonald, a one-word sender name, a rental enquiry written in Spanish, a
+genuine "more information about renting the hall" request, and a vendor following up from
+a company address. All score 0 except the bug report and the vendor at 2.
+
+The suite lives outside the repo, in the session workspace. Worth keeping: every round of
+tightening has been a question of whether the new rule breaks an old legitimate case, and
+guessing at that is how a contact form quietly stops delivering.
 
 ### Tuning without editing code
 
@@ -106,6 +156,9 @@ Spam, that's the rule to loosen: require two pitch signals instead of one.
 | `denver17_contact_recipient` | Route by topic slug |
 | `denver17_contact_topics` | Change the topic dropdown |
 | `denver17_contact_spam_terms` | Add/remove scored vocabulary |
+| `denver17_contact_spam_domains` | Sender domains/TLDs scored as suspect |
+| `denver17_contact_lodge_words` | Vocabulary that marks a message as lodge-relevant |
+| `denver17_contact_site_identity` | Site-name strings stripped before the lodge test |
 | `denver17_contact_spam_score` | Final say on any score |
 | `denver17_contact_allowed_domains` | Domains exempt from the no-links rule |
 | `denver17_contact_blocklist` | Email/IP substrings blocked outright |

@@ -176,6 +176,55 @@ function denver17_contact_has_link( $text ) {
 }
 
 /**
+ * Normalised fingerprint of a message body, for spotting the same template
+ * arriving repeatedly under different names.
+ */
+function denver17_contact_body_hash( $message ) {
+	$norm = strtolower( (string) $message );
+	$norm = preg_replace( '/[^a-z0-9]+/u', ' ', $norm );
+	$norm = trim( preg_replace( '/\s+/', ' ', $norm ) );
+
+	return md5( $norm );
+}
+
+/**
+ * Has this exact body arrived before from a DIFFERENT address?
+ *
+ * The 24-hour transient check catches a burst; this catches the slow drip of
+ * the same template over weeks, which is what actually happens. Keyed on a
+ * different sender so a member resending their own unanswered message is not
+ * punished for it.
+ */
+function denver17_contact_duplicate_body( $message, $email ) {
+
+	$hash = denver17_contact_body_hash( $message );
+
+	$prior = get_posts(
+		array(
+			'post_type'      => DENVER17_CONTACT_CPT,
+			'post_status'    => array( 'publish', 'elks_spam' ),
+			'posts_per_page' => 5,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+			'meta_query'     => array(
+				array(
+					'key'   => '_contact_hash',
+					'value' => $hash,
+				),
+			),
+		)
+	);
+
+	foreach ( $prior as $id ) {
+		if ( strtolower( (string) get_post_meta( $id, '_contact_email', true ) ) !== strtolower( (string) $email ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Has this address had a message filed as spam before?
  *
  * Self-training: once Leo or Megan leaves something in the Spam view, that
@@ -455,8 +504,25 @@ function denver17_contact_spam_score( $input ) {
 
 	$lodge_ref = false;
 
+	// Strip the site's own name first. A mail-merged "— denver elks lodge #17"
+	// tacked onto a template is not evidence the sender knows anything about
+	// this lodge, and treating it as such is exactly how these get through.
+	$site_words = apply_filters(
+		'denver17_contact_site_identity',
+		array( strtolower( get_bloginfo( 'name' ) ), 'denver elks lodge', 'denver elks', 'denverelks.org', 'denverelks', 'bpoe 17', 'bpoe17', 'lodge #17', 'elks #17', 'elks lodge', '#17' )
+	);
+
+	$lodge_check = $haystack;
+
+	foreach ( $site_words as $sw ) {
+		$sw = trim( (string) $sw );
+		if ( '' !== $sw ) {
+			$lodge_check = str_replace( $sw, ' ', $lodge_check );
+		}
+	}
+
 	foreach ( $lodge_words as $w ) {
-		if ( false !== strpos( $haystack, $w ) ) {
+		if ( false !== strpos( $lodge_check, $w ) ) {
 			$lodge_ref = true;
 			break;
 		}
@@ -493,6 +559,47 @@ function denver17_contact_spam_score( $input ) {
 			$score    += 2;
 			$reasons[] = 'list-probe';
 			break;
+		}
+	}
+
+	// Contentless information request. Gated on the lodge test, so "I'd like
+	// more information about renting the hall" is unaffected.
+	if ( ! $lodge_ref ) {
+		$info_probes = array(
+			'more information', 'more info', 'further information',
+			'please contact me', 'contact me by email', 'contact me at',
+			'get back to me', 'reply to me', 'awaiting your reply',
+			'interested in your', 'send me details', 'send me your',
+		);
+
+		foreach ( $info_probes as $w ) {
+			if ( false !== strpos( $haystack, $w ) ) {
+				$score    += 3;
+				$reasons[] = 'info-probe';
+				break;
+			}
+		}
+	}
+
+	// Address bearing no relation to the stated name, with no separator in the
+	// local part: "Matthew Anderson <xEisei@gmail.com>". Weak on its own (real
+	// people use work and nickname addresses), useful in combination.
+	$local = strtolower( strstr( $input['email'], '@', true ) );
+
+	if ( '' !== $local && ! preg_match( '/[._\-+]/', $local ) ) {
+		$matched = false;
+
+		foreach ( preg_split( '/\s+/u', strtolower( $name_trim ) ) as $token ) {
+			$token = preg_replace( '/[^a-z]/', '', $token );
+			if ( strlen( $token ) >= 3 && false !== strpos( $local, $token ) ) {
+				$matched = true;
+				break;
+			}
+		}
+
+		if ( ! $matched ) {
+			$score    += 2;
+			$reasons[] = 'email-mismatch';
 		}
 	}
 
@@ -609,6 +716,11 @@ function denver17_contact_handle() {
 		$spam['reasons'][] = 'repeat-sender';
 	}
 
+	if ( ! $is_spam && denver17_contact_duplicate_body( $input['message'], $input['email'] ) ) {
+		$is_spam           = true;
+		$spam['reasons'][] = 'duplicate-body';
+	}
+
 	$post_id = wp_insert_post(
 		wp_slash(
 			array(
@@ -632,6 +744,7 @@ function denver17_contact_handle() {
 	update_post_meta( $post_id, '_contact_ip', $ip );
 	update_post_meta( $post_id, '_contact_ua', mb_substr( isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '', 0, 255 ) );
 	update_post_meta( $post_id, '_contact_spam_score', $spam['score'] );
+	update_post_meta( $post_id, '_contact_hash', denver17_contact_body_hash( $input['message'] ) );
 	update_post_meta( $post_id, '_contact_spam_reasons', implode( ', ', $spam['reasons'] ) );
 
 	// --- Notify ----------------------------------------------------------

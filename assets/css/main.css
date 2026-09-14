@@ -853,7 +853,7 @@ nav.site-nav {
   line-height: 1.25;
   color: var(--p900);
 }
-.ev-title a { color: inherit; }
+.ev-title a { color: inherit; text-decoration: none; }
 .ev-title a:hover { color: var(--p600); }
 
 .ev-loc {
@@ -877,6 +877,7 @@ nav.site-nav {
   font-weight: 700;
   letter-spacing: 0.6px;
   text-transform: uppercase;
+  text-decoration: none;
   color: #fff;
   background: var(--p600);
   padding: 11px 20px;
@@ -934,6 +935,7 @@ nav.site-nav {
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
+  text-decoration: none;
   padding: 14px 28px;
   border-radius: 999px;
   transition: opacity 0.15s ease;
@@ -945,6 +947,107 @@ nav.site-nav {
 @media (max-width: 640px) {
   .eb-nav--prev { left: 2px; }
   .eb-nav--next { right: 2px; }
+}
+
+
+/* --------------------------------------------------------------------------
+   8c. Featured Events — calendar-page block
+   (denver17-events featured-events block, rendered inline in
+   blocks/featured-events/render.php — no theme template part, no purple band,
+   no heading: this sits directly on a normal Page's white background, above
+   the Calendar block. Jason: "remove the purple background and the what's
+   happening headers... don't need the all events link" — 2026-09-08.)
+   -------------------------------------------------------------------------- */
+.elks17-featured-events {
+  padding: 8px 0 56px;
+}
+
+.elks17-featured-events .eb-carousel {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* One large card above the carousel: image one side, details the other. */
+.fe-hero {
+  max-width: 1200px;
+  margin: 0 auto 46px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba(13, 10, 40, 0.35);
+}
+
+.fe-hero-media {
+  position: relative;
+  min-height: 340px;
+  background: var(--p800);
+}
+.fe-hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fe-hero-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding: 44px 48px;
+}
+
+.fe-hero-eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--p600);
+  font-weight: 700;
+}
+
+.fe-hero-title {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.18;
+  color: var(--p900);
+}
+.fe-hero-title a { color: inherit; text-decoration: none; }
+.fe-hero-title a:hover { color: var(--p600); }
+
+.fe-hero-date {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--p600);
+}
+
+.fe-hero-loc {
+  font-size: 14px;
+  color: #5b5573;
+}
+
+.fe-hero-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #5b5573;
+}
+
+.fe-hero-btn {
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+@media (max-width: 780px) {
+  .fe-hero {
+    grid-template-columns: 1fr;
+  }
+  .fe-hero-media { min-height: 240px; }
+  .fe-hero-body { padding: 28px 26px; }
+  .fe-hero-title { font-size: 24px; }
 }
 
 
@@ -1466,7 +1569,8 @@ nav.site-nav {
 .page-entry-content:has(> :first-child.elks-flush-top),
 .page-entry-content:has(> :first-child.elks-flush),
 .page-entry-content:has(> .feature-split:first-child),
-.page-entry-content:has(> .cta-band:first-child) {
+.page-entry-content:has(> .cta-band:first-child),
+.page-entry-content:has(> .elks17-featured-events:first-child) {
   padding-top: 0;
 }
 
@@ -1475,7 +1579,8 @@ nav.site-nav {
 .page-entry-content:has(> :last-child.elks-flush-bottom),
 .page-entry-content:has(> :last-child.elks-flush),
 .page-entry-content:has(> .feature-split:last-child),
-.page-entry-content:has(> .cta-band:last-child) {
+.page-entry-content:has(> .cta-band:last-child),
+.page-entry-content:has(> .elks17-featured-events:last-child) {
   padding-bottom: 0;
 }
 
@@ -1521,11 +1626,14 @@ nav.site-nav {
 .page-entry-content > .alignwide  { margin-left: auto; margin-right: auto; }
 .page-entry-content > .alignfull  { margin-left: -48px; margin-right: -48px; }
 
-/* Feature Split and CTA Band are full-bleed section blocks, same as they
-   render on the homepage — they need to break out of the 800px prose column
-   the same way alignfull does, without an editor having to toggle anything. */
+/* Feature Split, CTA Band, and Featured Events are full-bleed section blocks,
+   same as they render on the homepage — they need to break out of the 800px
+   prose column the same way alignfull does, without an editor having to
+   toggle anything. (Featured Events added 2026-09-08, punch list — the
+   events/calendar page drops this above the calendar block.) */
 .page-entry-content > .feature-split,
-.page-entry-content > .cta-band {
+.page-entry-content > .cta-band,
+.page-entry-content > .elks17-featured-events {
   max-width: calc(100% + 96px);
   width: calc(100% + 96px);
   margin-left: -48px;

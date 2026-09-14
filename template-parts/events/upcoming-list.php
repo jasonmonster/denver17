@@ -25,13 +25,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $section_heading = $args['section_heading'] ?? 'Upcoming at the lodge';
 $events          = $args['events'] ?? [];
+// Three opt-out flags, all defaulting to the original homepage behavior, so
+// this template part can also render as the "next 10" row nested inside the
+// featured-events block (which supplies its own band background + single
+// heading and would otherwise get a duplicated purple band + duplicated
+// heading). See blocks/featured-events. (punch list, added 2026-09-08)
+$show_heading  = $args['show_heading'] ?? true;
+$show_view_all = $args['show_view_all'] ?? true;
+$wrap_section  = $args['wrap_section'] ?? true;
+$tag           = $wrap_section ? 'section' : 'div';
 ?>
-<section id="upcoming-events" class="events-band elks17-upcoming">
+<<?php echo $tag; ?><?php echo $wrap_section ? ' id="upcoming-events" class="events-band elks17-upcoming"' : ' class="elks17-upcoming"'; ?>>
 
+	<?php if ( $show_heading ) : ?>
 	<div class="eb-head">
 		<div class="eb-tag">What&rsquo;s happening</div>
 		<h2 class="eb-h"><?php echo esc_html( $section_heading ); ?></h2>
 	</div>
+	<?php endif; ?>
 
 	<?php if ( empty( $events ) ) : ?>
 
@@ -111,10 +122,12 @@ $events          = $args['events'] ?? [];
 
 	<?php endif; ?>
 
+	<?php if ( $show_view_all ) : ?>
 	<div class="eb-view-all">
 		<a class="eb-view-all-btn" href="<?php echo esc_url( home_url( '/events/' ) ); ?>">
 			View All Events<span class="eb-view-all-arrow" aria-hidden="true">&rarr;</span>
 		</a>
 	</div>
+	<?php endif; ?>
 
-</section>
+</<?php echo $tag; ?>>
