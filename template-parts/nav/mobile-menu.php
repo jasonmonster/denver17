@@ -36,7 +36,7 @@ $instagram = get_theme_mod( 'denver17_instagram', '' );
         ?>
     </div>
 
-    <a class="mobile-menu-cta" href="<?php echo esc_url( home_url( '/member-area/' ) ); ?>">
+    <a class="mobile-menu-cta" href="<?php echo esc_url( function_exists( 'elks17m_url' ) ? elks17m_url() : home_url( '/member-area/' ) ); ?>">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"/></svg>
         Member Area
     </a>
