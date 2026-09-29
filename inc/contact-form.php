@@ -27,6 +27,14 @@ define( 'DENVER17_CONTACT_MIN_SECONDS', 3 );      // Faster than this is a bot.
 define( 'DENVER17_CONTACT_MAX_PER_HOUR', 5 );     // Per IP.
 define( 'DENVER17_CONTACT_SPAM_THRESHOLD', 3 );   // Score at or above this = spam.
 
+// Reading, releasing and deleting messages. Its own capability rather than the
+// standard post permissions, so the members plugin can give it to the
+// Communications role without anything else. Only this plural capability is
+// ever granted to a role; never use it as the post type's edit_post.
+define( 'DENVER17_CONTACT_CAP', 'elks_contact_messages' );
+// Bump when the capability changes so administrators are granted it again.
+define( 'DENVER17_CONTACT_CAP_VERSION', '1' );
+
 /**
  * Topic list. Keys are stored; values are shown.
  */
@@ -105,10 +113,46 @@ function denver17_contact_register_cpt() {
 			'exclude_from_search' => true,
 			'capability_type'     => 'post',
 			'map_meta_cap'        => true,
-			// Messages arrive from the form only — no "Add New".
-			'capabilities'        => array( 'create_posts' => 'do_not_allow' ),
+			'capabilities'        => array(
+				'edit_posts'             => DENVER17_CONTACT_CAP,
+				'edit_others_posts'      => DENVER17_CONTACT_CAP,
+				'edit_published_posts'   => DENVER17_CONTACT_CAP,
+				'edit_private_posts'     => DENVER17_CONTACT_CAP,
+				'read_private_posts'     => DENVER17_CONTACT_CAP,
+				'publish_posts'          => DENVER17_CONTACT_CAP,
+				'delete_posts'           => DENVER17_CONTACT_CAP,
+				'delete_others_posts'    => DENVER17_CONTACT_CAP,
+				'delete_published_posts' => DENVER17_CONTACT_CAP,
+				'delete_private_posts'   => DENVER17_CONTACT_CAP,
+				// Messages arrive from the form only — no "Add New".
+				'create_posts'           => 'do_not_allow',
+			),
 		)
 	);
+}
+
+/**
+ * Give administrators DENVER17_CONTACT_CAP whenever its version changes.
+ * Stored roles don't pick up code changes on their own, and a theme has no
+ * activation hook that runs on deploy.
+ */
+add_action( 'init', 'denver17_contact_grant_cap', 1 );
+function denver17_contact_grant_cap() {
+	if ( DENVER17_CONTACT_CAP_VERSION === get_option( 'denver17_contact_cap_version' ) ) {
+		return;
+	}
+	$role = get_role( 'administrator' );
+	if ( ! $role ) {
+		return;
+	}
+	$role->add_cap( DENVER17_CONTACT_CAP );
+	update_option( 'denver17_contact_cap_version', DENVER17_CONTACT_CAP_VERSION, false );
+
+	// Recompute the signed-in user's capabilities so this request already has it.
+	$user = wp_get_current_user();
+	if ( $user->exists() ) {
+		$user->get_role_caps();
+	}
 }
 
 /**
@@ -1175,7 +1219,7 @@ function denver17_contact_failure_notice() {
 		return;
 	}
 
-	if ( ! current_user_can( 'edit_posts' ) ) {
+	if ( ! current_user_can( DENVER17_CONTACT_CAP ) ) {
 		return;
 	}
 
