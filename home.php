@@ -8,8 +8,8 @@
  * them here, so there's no thumbnail markup to keep in sync. Each item shows
  * a linked category eyebrow, date, title, and excerpt.
  *
- * Members Only posts never reach this loop — inc/post-visibility.php strips
- * them out via pre_get_posts until member login exists.
+ * Members Only posts reach this loop only for signed-in members
+ * (inc/post-visibility.php), and carry a "Members" tag like Both posts.
  */
 
 get_header();
@@ -52,6 +52,7 @@ $banner_subtitle  = $posts_page_id ? get_the_excerpt( $posts_page_id ) : '';
                             <time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
                                 <?php echo esc_html( get_the_date() ); ?>
                             </time>
+                            <?php denver17_members_tag(); ?>
                         </div>
 
                         <h2 class="archive-item-title">

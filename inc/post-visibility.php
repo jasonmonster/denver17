@@ -2,22 +2,21 @@
 /**
  * Post Visibility — Public / Members Only / Both
  *
- * Adds a three-way visibility field to standard Posts (News feed) so editors
- * can flag content for a future members-only feed without any login system
- * existing yet. Values, stored in post meta key `_denver17_visibility`:
+ * Adds a three-way visibility field to standard Posts (News feed). Values,
+ * stored in post meta key `_denver17_visibility`:
  *
  *   public        Visible everywhere. Default.
- *   members_only  Hidden from the public News feed, category/tag/search
- *                 archives, and the single post URL, until member login
- *                 ships. Still fully visible/editable in wp-admin.
- *   both          Visible everywhere Public is, and will also appear in the
- *                 members-only feed once that exists. Front end shows a
- *                 small "Members" badge to signal the crossover.
+ *   members_only  Signed-in members only. Members see it in the News list
+ *                 and archives with a "Members" tag and can open it. Everyone
+ *                 else: absent from the list, archives, search, feeds, the
+ *                 REST API and the sitemap; the URL sends them to sign in.
+ *   both          Visible to everyone, tagged "Members".
  *
- * No login system exists yet (see claude/working-rules.md — Member Area is
- * nav-only, not gated, by deliberate choice). This file only prepares the
- * data model and the public-side hiding; the future members feed is a
- * separate, not-yet-scheduled piece of work.
+ * "Is this viewer a member?" is a question the theme asks and the members
+ * plugin answers (denver17_viewer_is_member filter), so the theme still works
+ * with that plugin off: no answer means nobody but editors counts as a member.
+ * Any signed-in member counts, lapsed or not — news isn't a paid benefit
+ * (staff guide fix plan, issue 3, 2026-10-01).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -53,6 +52,25 @@ function denver17_get_post_visibility( $post_id = 0 ) {
  */
 function denver17_is_members_only( $post_id = 0 ) {
 	return 'members_only' === denver17_get_post_visibility( $post_id );
+}
+
+/**
+ * Can the current viewer read Members Only posts? Anyone who can edit posts
+ * (administrators, Communications staff), or a signed-in member as answered
+ * by the members plugin.
+ *
+ * @return bool
+ */
+function denver17_viewer_is_member() {
+	// Not cached: a REST request can change the current user after the first
+	// call (cookie auth without a nonce drops to logged-out).
+	if ( ! is_user_logged_in() ) {
+		return false;
+	}
+	if ( current_user_can( 'edit_posts' ) ) {
+		return true;
+	}
+	return (bool) apply_filters( 'denver17_viewer_is_member', false );
 }
 
 /**
@@ -92,8 +110,8 @@ function denver17_render_visibility_meta_box( $post ) {
 
 	$options = [
 		'public'       => 'Public — visible to everyone.',
-		'members_only' => 'Members Only — hidden from the public News feed and archives, and the post URL is blocked, until member login exists.',
-		'both'         => 'Both — visible to everyone now, and will also show in the members feed once that exists.',
+		'members_only' => 'Members Only — only signed-in members can see or open it. Hidden from the public, search engines and feeds.',
+		'both'         => 'Both — visible to everyone, tagged "Members".',
 	];
 
 	echo '<p style="margin-top:0;">';
@@ -167,22 +185,9 @@ add_action( 'manage_post_posts_custom_column', function ( $column, $post_id ) {
 // Front end — hide Members Only from public feeds, archives, and search
 // =============================================================================
 
-/**
- * Excludes Members Only posts from every public-facing post listing.
- * "Both" posts are left in (they're public too). Admin queries are untouched
- * so editors can always find every post in wp-admin regardless of visibility.
- */
-function denver17_hide_members_only_from_public_queries( $query ) {
-	if ( is_admin() || ! $query->is_main_query() ) {
-		return;
-	}
-
-	if ( ! ( is_home() || is_category() || is_tag() || is_search() || is_date() || is_author() ) ) {
-		return;
-	}
-
-	$meta_query   = (array) $query->get( 'meta_query' );
-	$meta_query[] = [
+/** The meta_query clause that leaves Members Only posts out. */
+function denver17_members_only_exclusion() {
+	return [
 		'relation' => 'OR',
 		[
 			'key'     => DENVER17_VISIBILITY_META_KEY,
@@ -194,25 +199,114 @@ function denver17_hide_members_only_from_public_queries( $query ) {
 			'compare' => '!=',
 		],
 	];
+}
+
+/**
+ * Leaves Members Only posts out of front-end listings for non-members, and
+ * out of feeds for everyone (feed readers never carry a member's session).
+ * Admin queries are untouched so editors always find every post in wp-admin.
+ */
+function denver17_hide_members_only_from_public_queries( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	$is_listing = $query->is_home() || $query->is_category() || $query->is_tag() || $query->is_search()
+		|| $query->is_date() || $query->is_author();
+
+	if ( ! $query->is_feed() && ! ( $is_listing && ! denver17_viewer_is_member() ) ) {
+		return;
+	}
+
+	$meta_query   = (array) $query->get( 'meta_query' );
+	$meta_query[] = denver17_members_only_exclusion();
 	$query->set( 'meta_query', $meta_query );
 }
 add_action( 'pre_get_posts', 'denver17_hide_members_only_from_public_queries' );
 
 /**
- * Blocks direct access to a Members Only post's URL. No login system exists
- * to check against yet, so this is a hard block for everyone (including admins
- * viewing the front end — they can still open/edit the post from wp-admin).
- * Redirects to the home page rather than 404ing, since a 404 for a post that
- * *does* exist reads as a broken link rather than a deliberate restriction.
+ * A non-member opening a Members Only post is sent to sign in, and comes back
+ * to the post afterwards. The members plugin supplies its sign-in URL through
+ * elks17_member_login_url; without it, the homepage.
  */
 function denver17_block_members_only_single() {
 	if ( is_admin() || ! is_singular( 'post' ) ) {
 		return;
 	}
-
-	if ( denver17_is_members_only( get_queried_object_id() ) ) {
-		wp_safe_redirect( home_url( '/' ) );
-		exit;
+	if ( ! denver17_is_members_only( get_queried_object_id() ) || denver17_viewer_is_member() ) {
+		return;
 	}
+
+	$login = apply_filters( 'elks17_member_login_url', '' );
+	if ( $login ) {
+		$path  = wp_parse_url( get_permalink( get_queried_object_id() ), PHP_URL_PATH );
+		$login = add_query_arg( 'redirect_to', rawurlencode( $path ), $login );
+	}
+	nocache_headers();
+	wp_safe_redirect( $login ? $login : home_url( '/' ) );
+	exit;
 }
 add_action( 'template_redirect', 'denver17_block_members_only_single' );
+
+/**
+ * REST: /wp/v2/posts would otherwise hand any visitor the full text. A REST
+ * request authenticated by cookie and nonce (the block editor) runs as the
+ * signed-in user, so editors are unaffected.
+ */
+add_filter( 'rest_post_query', function ( $args ) {
+	if ( denver17_viewer_is_member() ) {
+		return $args;
+	}
+	$args['meta_query']   = isset( $args['meta_query'] ) ? (array) $args['meta_query'] : [];
+	$args['meta_query'][] = denver17_members_only_exclusion();
+	return $args;
+} );
+
+// A single post is refused before the controller runs. (Returning a WP_Error
+// from rest_prepare_post instead is a fatal: get_item() calls link_header() on
+// whatever comes back.)
+add_filter( 'rest_request_before_callbacks', function ( $response, $handler, $request ) {
+	if ( is_wp_error( $response ) || ! preg_match( '#^/wp/v2/posts/(\d+)#', $request->get_route(), $m ) ) {
+		return $response;
+	}
+	if ( denver17_is_members_only( (int) $m[1] ) && ! denver17_viewer_is_member() ) {
+		return new WP_Error( 'rest_post_invalid_id', 'Invalid post ID.', [ 'status' => 404 ] );
+	}
+	return $response;
+}, 10, 3 );
+
+/** Keep Members Only posts out of search engines and Rank Math's sitemap. */
+add_filter( 'wp_robots', function ( $robots ) {
+	if ( is_singular( 'post' ) && denver17_is_members_only( get_queried_object_id() ) ) {
+		$robots['noindex'] = true;
+		$robots['nofollow'] = true;
+	}
+	return $robots;
+} );
+
+add_filter( 'rank_math/frontend/robots', function ( $robots ) {
+	if ( is_singular( 'post' ) && denver17_is_members_only( get_queried_object_id() ) ) {
+		$robots['index']  = 'noindex';
+		$robots['follow'] = 'nofollow';
+	}
+	return $robots;
+} );
+
+add_filter( 'rank_math/sitemap/entry', function ( $url, $type, $object ) {
+	// Rank Math passes a raw database row here, not a WP_Post.
+	if ( 'post' === $type && is_object( $object ) && ! empty( $object->ID ) && denver17_is_members_only( (int) $object->ID ) ) {
+		return false;
+	}
+	return $url;
+}, 10, 3 );
+
+/**
+ * "Members" tag shown in the News list's meta line for Members Only and Both
+ * posts. Echoes nothing for public posts.
+ */
+function denver17_members_tag( $post_id = 0 ) {
+	if ( 'public' === denver17_get_post_visibility( $post_id ) ) {
+		return;
+	}
+	echo '<span aria-hidden="true">&middot;</span> <span class="archive-item-members">Members</span>';
+}

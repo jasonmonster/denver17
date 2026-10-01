@@ -65,6 +65,7 @@ if ( is_category() ) {
                             <time datetime="<?php echo esc_attr( get_the_date( 'c' ) ); ?>">
                                 <?php echo esc_html( get_the_date() ); ?>
                             </time>
+                            <?php denver17_members_tag(); ?>
                         </div>
 
                         <h2 class="archive-item-title">

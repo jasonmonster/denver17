@@ -2736,3 +2736,17 @@ nav.site-nav {
   .error-404-content { padding-top: 36px; padding-bottom: 48px; }
   .error-404-actions { flex-direction: column; gap: 16px; }
 }
+
+/* "Members" tag on Members Only and Both posts in the News list (inc/post-visibility.php). */
+.archive-item-members {
+    display: inline-block;
+    padding: 0.05rem 0.5rem;
+    border-radius: 999px;
+    background: var(--gold);
+    color: #241a05;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
